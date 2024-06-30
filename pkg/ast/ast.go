@@ -21,34 +21,50 @@ func eat(t []token.Token) {
 	}
 }
 
-func Expr(t []token.Token) interface{} {
-	if current >= len(t) {
+type AstBuilder struct {
+	tokens              []token.Token
+	currentTokenPointer int
+}
+
+func NewAstBuilder(tokens []token.Token) AstBuilder {
+	return AstBuilder{
+		tokens:              tokens,
+		currentTokenPointer: 0,
+	}
+}
+
+func (a *AstBuilder) Parse() interface{} {
+	return a.Expr()
+}
+
+func (a *AstBuilder) Expr() interface{} {
+	if current >= len(a.tokens) {
 		return nil
 	}
-	left := Term(t)
-	for t[current].TokenType == token.PLUS {
-		eat(t)
-		right := Term(t)
+	left := a.Term()
+	for a.tokens[current].TokenType == token.PLUS {
+		eat(a.tokens)
+		right := a.Term()
 		left = BinOP{left: left, right: right, op: token.PLUS}
 	}
 	return left
 }
 
-func Term(t []token.Token) interface{} {
-	if current >= len(t) {
+func (a *AstBuilder) Term() interface{} {
+	if current >= len(a.tokens) {
 		return nil
 	}
-	left := Eval(t)
-	for t[current].TokenType == token.MULTIPLY {
-		eat(t)
-		right := Eval(t)
+	left := a.Eval()
+	for a.tokens[current].TokenType == token.MULTIPLY {
+		eat(a.tokens)
+		right := a.Eval()
 		left = BinOP{left: left, right: right, op: token.MULTIPLY}
 	}
 	return left
 }
 
-func Eval(t []token.Token) interface{} {
+func (a *AstBuilder) Eval() interface{} {
 	c := current
-	eat(t)
-	return AstNode{Value: t[c].Value, NodeType: t[c].TokenType}
+	eat(a.tokens)
+	return AstNode{Value: a.tokens[c].Value, NodeType: a.tokens[c].TokenType}
 }

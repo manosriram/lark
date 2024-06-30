@@ -15,10 +15,8 @@ func main() {
 	}
 
 	tokens := token.Tokenize(string(content))
-	tr := ast.Expr(tokens.Tokens)
-	fmt.Println(tr)
-	// for _, x := range tokens.Tokens {
-	// fmt.Println(x)
-	// }
+	builder := ast.NewAstBuilder(tokens.Tokens)
+	tree := builder.Parse()
 
+	fmt.Println(tree)
 }
