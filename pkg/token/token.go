@@ -1,6 +1,10 @@
 package token
 
-import "unicode"
+import (
+	"log"
+	"strconv"
+	"unicode"
+)
 
 type TOKEN_TYPE string
 
@@ -15,30 +19,41 @@ const (
 	NOT                  = "!"
 	NOT_EQUAL            = "!="
 	SEMICOLON            = ";"
-	VAR                  = "var"
+	ID                   = "id"
+	NUMBER               = "number"
 	EOF                  = "EOF"
 )
 
 type Token struct {
-	position  int
-	tokenType TOKEN_TYPE
+	Position  int
+	TokenType TOKEN_TYPE
+	Value     interface{}
 }
 
 type Source struct {
 	Content         string
-	Tokens          []TOKEN_TYPE
+	Tokens          []Token
 	CurrentPosition int
 	TokenSoFar      string
 }
 
-func isalphanumeric(c rune) bool {
-	if !unicode.IsLetter(c) && !unicode.IsNumber(c) {
-		return false
-	}
-	return true
+func isnumeric(c rune) bool {
+	return unicode.IsNumber(c)
 }
+
+func isalpha(c rune) bool {
+	return unicode.IsLetter(c)
+}
+
+func (s *Source) eatNum() {
+	for s.CurrentPosition < len(s.Content) && (isnumeric(rune(s.Content[s.CurrentPosition]))) {
+		s.CurrentPosition += 1
+	}
+	// s.CurrentPosition += 1
+}
+
 func (s *Source) eatVar() {
-	for s.CurrentPosition < len(s.Content) && (isalphanumeric(rune(s.Content[s.CurrentPosition]))) {
+	for s.CurrentPosition < len(s.Content) && (isalpha(rune(s.Content[s.CurrentPosition]))) {
 		s.CurrentPosition += 1
 	}
 	// s.CurrentPosition += 1
@@ -58,7 +73,7 @@ func Tokenize(source string) *Source {
 	s := Source{
 		Content:         source,
 		CurrentPosition: 0,
-		Tokens:          make([]TOKEN_TYPE, 0),
+		Tokens:          make([]Token, 0),
 		TokenSoFar:      "",
 	}
 	// s.eat()
@@ -66,44 +81,40 @@ func Tokenize(source string) *Source {
 		charAtPosition := s.Content[s.CurrentPosition]
 		switch charAtPosition {
 		case '+':
-			s.Tokens = append(s.Tokens, PLUS)
+			s.Tokens = append(s.Tokens, Token{TokenType: PLUS, Value: '+'})
 			s.eat()
 			break
-		case '-':
-			s.Tokens = append(s.Tokens, MINUS)
-			s.eat()
-			break
+		// case '-':
+		// s.Tokens = append(s.Tokens, Token{TokenType: MINUS, Value: '-'})
+		// s.eat()
+		// break
 		case '*':
-			s.Tokens = append(s.Tokens, MULTIPLY)
-			s.eat()
-			break
-		case '/':
-			s.Tokens = append(s.Tokens, DIVIDE)
+			s.Tokens = append(s.Tokens, Token{TokenType: MULTIPLY, Value: '*'})
 			s.eat()
 			break
 		case '=':
-			s.Tokens = append(s.Tokens, EQUAL)
+			s.Tokens = append(s.Tokens, Token{TokenType: EQUAL, Value: '='})
 			s.eat()
 			break
-		case '!':
-			if string(s.Content[s.CurrentPosition+1]) == "=" {
-				s.Tokens = append(s.Tokens, NOT_EQUAL)
-				s.eat()
-			} else {
-				s.Tokens = append(s.Tokens, NOT)
-			}
-			s.eat()
-			break
-		case '(':
-			s.Tokens = append(s.Tokens, LBRACE)
-			s.eat()
-			break
-		case ')':
-			s.Tokens = append(s.Tokens, RBRACE)
-			s.eat()
-			break
+		// case '!':
+		// if string(s.Content[s.CurrentPosition+1]) == "=" {
+		// s.Tokens = append(s.Tokens, NOT_EQUAL)
+		// s.eat()
+		// } else {
+		// s.Tokens = append(s.Tokens, NOT)
+		// }
+		// s.eat()
+		// break
+		// case '(':
+		// s.Tokens = append(s.Tokens, LBRACE)
+		// s.eat()
+		// break
+		// case ')':
+		// s.Tokens = append(s.Tokens, RBRACE)
+		// s.eat()
+		// break
 		case ';':
-			s.Tokens = append(s.Tokens, SEMICOLON)
+			s.Tokens = append(s.Tokens, Token{TokenType: SEMICOLON, Value: ';'})
 			s.eat()
 			break
 		case ' ':
@@ -113,11 +124,23 @@ func Tokenize(source string) *Source {
 			s.eat()
 			break
 		default: // variable decl
-			// bef := s.CurrentPosition
-			s.eatVar()
-			// variable := s.Content[bef:aft]
-			// s.eat()
-			s.Tokens = append(s.Tokens, VAR)
+			if unicode.IsNumber(rune(s.Content[s.CurrentPosition])) {
+				before := s.CurrentPosition
+				s.eatNum()
+				after := s.CurrentPosition
+				variable := s.Content[before:after]
+				n, e := strconv.Atoi(variable)
+				if e != nil {
+					log.Fatal("cannot parse source")
+				}
+				s.Tokens = append(s.Tokens, Token{TokenType: NUMBER, Value: n})
+			} else {
+				before := s.CurrentPosition
+				s.eatVar()
+				after := s.CurrentPosition
+				variable := s.Content[before:after]
+				s.Tokens = append(s.Tokens, Token{TokenType: ID, Value: variable})
+			}
 
 		}
 	}
