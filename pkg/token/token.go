@@ -7,6 +7,12 @@ import (
 )
 
 type TOKEN_TYPE string
+type NUMBER_TYPE string
+
+const (
+	INT   NUMBER_TYPE = "int"
+	FLOAT NUMBER_TYPE = "float"
+)
 
 const (
 	PLUS      TOKEN_TYPE = "+"
@@ -38,7 +44,7 @@ type Source struct {
 }
 
 func isnumeric(c rune) bool {
-	return unicode.IsNumber(c)
+	return unicode.IsDigit(c)
 }
 
 func isalpha(c rune) bool {

@@ -16,6 +16,15 @@ type AstNode struct {
 	NodeType token.TOKEN_TYPE
 }
 
+type Number struct {
+	Value interface{}
+}
+
+type Id struct {
+	Name  string
+	Value interface{}
+}
+
 type Assign struct {
 	Id    interface{}
 	Value interface{}
@@ -57,24 +66,23 @@ func (a *AstBuilder) Expr() interface{} {
 		return nil
 	}
 	left := a.Term()
-	if a.tokens[a.CurrentTokenPointer].TokenType == token.PLUS {
+	switch a.tokens[a.CurrentTokenPointer].TokenType {
+	case token.PLUS:
 		for a.tokens[a.CurrentTokenPointer].TokenType == token.PLUS {
 			a.eat()
 			right := a.Expr()
 			left = BinOP{left: left, right: right, op: token.PLUS}
 		}
-	}
-	if a.tokens[a.CurrentTokenPointer].TokenType == token.MINUS {
+	case token.MINUS:
 		for a.tokens[a.CurrentTokenPointer].TokenType == token.MINUS {
 			a.eat()
 			right := a.Expr()
 			left = BinOP{left: left, right: right, op: token.MINUS}
 		}
-	}
-	if a.tokens[a.CurrentTokenPointer].TokenType == token.EQUAL {
+	case token.EQUAL:
 		a.eat()
 		right := a.Expr()
-		left = Assign{Id: left, Value: right, Op: token.EQUAL}
+		return Assign{Id: left, Value: right, Op: token.EQUAL}
 	}
 	return left
 }
@@ -83,15 +91,15 @@ func (a *AstBuilder) Term() interface{} {
 	if a.CurrentTokenPointer >= len(a.tokens) {
 		return nil
 	}
-	left := a.Eval()
-	if a.tokens[a.CurrentTokenPointer].TokenType == token.MULTIPLY {
+	left := a.Factor()
+	switch a.tokens[a.CurrentTokenPointer].TokenType {
+	case token.MULTIPLY:
 		for a.tokens[a.CurrentTokenPointer].TokenType == token.MULTIPLY {
 			a.eat()
 			right := a.Term()
 			left = BinOP{left: left, right: right, op: token.MULTIPLY}
 		}
-	}
-	if a.tokens[a.CurrentTokenPointer].TokenType == token.DIVIDE {
+	case token.DIVIDE:
 		for a.tokens[a.CurrentTokenPointer].TokenType == token.DIVIDE {
 			a.eat()
 			right := a.Term()
@@ -101,8 +109,15 @@ func (a *AstBuilder) Term() interface{} {
 	return left
 }
 
-func (a *AstBuilder) Eval() interface{} {
+func (a *AstBuilder) Factor() interface{} {
 	c := a.CurrentTokenPointer
 	a.eat()
-	return AstNode{Value: a.tokens[c].Value, NodeType: a.tokens[c].TokenType}
+	switch a.tokens[c].TokenType {
+	case token.NUMBER:
+		return Number{Value: a.tokens[c].Value}
+	case token.ID:
+		return Id{Name: a.tokens[c].Value.(string)}
+
+	}
+	return nil
 }
