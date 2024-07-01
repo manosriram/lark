@@ -15,8 +15,11 @@ func main() {
 	}
 
 	tokens := token.Tokenize(string(content))
-	builder := ast.NewAstBuilder(tokens.Tokens)
-	tree := builder.Parse()
 
-	fmt.Println(tree)
+	builder := ast.NewAstBuilder(tokens.Tokens)
+	var tree interface{}
+	for builder.CurrentTokenPointer < len(tokens.Tokens)-1 {
+		tree = builder.Parse()
+		fmt.Println(tree)
+	}
 }

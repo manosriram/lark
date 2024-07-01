@@ -49,14 +49,12 @@ func (s *Source) eatNum() {
 	for s.CurrentPosition < len(s.Content) && (isnumeric(rune(s.Content[s.CurrentPosition]))) {
 		s.CurrentPosition += 1
 	}
-	// s.CurrentPosition += 1
 }
 
 func (s *Source) eatVar() {
 	for s.CurrentPosition < len(s.Content) && (isalpha(rune(s.Content[s.CurrentPosition]))) {
 		s.CurrentPosition += 1
 	}
-	// s.CurrentPosition += 1
 }
 func (s *Source) eat() {
 	done := false
@@ -76,7 +74,6 @@ func Tokenize(source string) *Source {
 		Tokens:          make([]Token, 0),
 		TokenSoFar:      "",
 	}
-	// s.eat()
 	for s.CurrentPosition < len(s.Content) {
 		charAtPosition := s.Content[s.CurrentPosition]
 		switch charAtPosition {
@@ -115,10 +112,13 @@ func Tokenize(source string) *Source {
 		case ';':
 			s.Tokens = append(s.Tokens, Token{TokenType: SEMICOLON, Value: ';'})
 			s.eat()
+			break
 		case ' ':
 			s.eat()
+			break
 		case '\n':
 			s.eat()
+			break
 		default: // variable decl
 			if unicode.IsNumber(rune(s.Content[s.CurrentPosition])) {
 				before := s.CurrentPosition
