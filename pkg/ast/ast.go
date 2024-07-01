@@ -19,6 +19,7 @@ type AstNode struct {
 type Assign struct {
 	Id    interface{}
 	Value interface{}
+	Op    token.TOKEN_TYPE
 }
 
 type BinOP struct {
@@ -73,10 +74,9 @@ func (a *AstBuilder) Expr() interface{} {
 	if a.tokens[a.CurrentTokenPointer].TokenType == token.EQUAL {
 		a.eat()
 		right := a.Expr()
-		left = Assign{Id: left, Value: right}
+		left = Assign{Id: left, Value: right, Op: token.EQUAL}
 	}
 	return left
-
 }
 
 func (a *AstBuilder) Term() interface{} {

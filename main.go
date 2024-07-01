@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	content, err := os.ReadFile("./source.lark")
+	content, err := os.ReadFile("source.lark")
 	if err != nil {
 		log.Fatal("error reading source file")
 	}
