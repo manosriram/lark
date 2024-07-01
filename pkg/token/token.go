@@ -83,19 +83,18 @@ func Tokenize(source string) *Source {
 		case '+':
 			s.Tokens = append(s.Tokens, Token{TokenType: PLUS, Value: '+'})
 			s.eat()
-			break
-		// case '-':
-		// s.Tokens = append(s.Tokens, Token{TokenType: MINUS, Value: '-'})
-		// s.eat()
-		// break
+		case '-':
+			s.Tokens = append(s.Tokens, Token{TokenType: MINUS, Value: '-'})
+			s.eat()
 		case '*':
 			s.Tokens = append(s.Tokens, Token{TokenType: MULTIPLY, Value: '*'})
 			s.eat()
-			break
+		case '/':
+			s.Tokens = append(s.Tokens, Token{TokenType: DIVIDE, Value: '/'})
+			s.eat()
 		case '=':
 			s.Tokens = append(s.Tokens, Token{TokenType: EQUAL, Value: '='})
 			s.eat()
-			break
 		// case '!':
 		// if string(s.Content[s.CurrentPosition+1]) == "=" {
 		// s.Tokens = append(s.Tokens, NOT_EQUAL)
@@ -116,13 +115,10 @@ func Tokenize(source string) *Source {
 		case ';':
 			s.Tokens = append(s.Tokens, Token{TokenType: SEMICOLON, Value: ';'})
 			s.eat()
-			break
 		case ' ':
 			s.eat()
-			break
 		case '\n':
 			s.eat()
-			break
 		default: // variable decl
 			if unicode.IsNumber(rune(s.Content[s.CurrentPosition])) {
 				before := s.CurrentPosition
