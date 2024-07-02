@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	token "lark/pkg/token"
 	"log"
 )
@@ -21,8 +22,14 @@ type AstNode struct {
 	NodeType token.TOKEN_TYPE
 }
 
+type Literal struct {
+	Value interface{}
+	Type  token.LITERAL_TYPE
+}
+
 type Number struct {
 	Value interface{}
+	Type  token.LITERAL_TYPE
 }
 
 type Id struct {
@@ -72,6 +79,7 @@ func (a *AstBuilder) eat() bool {
 func (a *AstBuilder) Parse() interface{} {
 	expr := a.Expr()
 	if a.getCurrentToken().TokenType != token.SEMICOLON {
+		// fmt.Println(a.getCurrentToken().Value)
 		log.Fatalf("syntax error: missing ;")
 	}
 	a.eat()
@@ -99,6 +107,7 @@ func (a *AstBuilder) Expr() interface{} {
 	case token.EQUAL:
 		a.eat()
 		right := a.Expr()
+		a.eat()
 		return Assign{Id: left, Value: right}
 	}
 	return left
@@ -130,9 +139,9 @@ func (a *AstBuilder) Term() interface{} {
 func (a *AstBuilder) Factor() interface{} {
 	c := a.CurrentTokenPointer
 	switch a.tokens[c].TokenType {
-	case token.NUMBER:
+	case token.LITERAL:
 		a.eat()
-		return Number{Value: a.tokens[c].Value}
+		return Literal{Value: a.tokens[c].Value, Type: a.tokens[c].LiteralType}
 	case token.ID:
 		a.eat()
 		return Id{Name: a.tokens[c].Value.(string)}
@@ -145,5 +154,6 @@ func (a *AstBuilder) Factor() interface{} {
 		a.eat()
 		return expr
 	}
+	fmt.Println("received nil ", a.tokens[c].TokenType)
 	return nil
 }

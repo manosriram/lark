@@ -7,11 +7,18 @@ import (
 )
 
 type TOKEN_TYPE string
-type STATEMENT_TYPE string
+type STATEMENT_TYPE int
+type LITERAL_TYPE int
 
 const (
-	EXPRESSION       STATEMENT_TYPE = "expression"
-	ASSIGN_STATEMENT                = "assign"
+	EXPRESSION_STATEMENT STATEMENT_TYPE = iota
+	ASSIGN_STATEMENT
+)
+
+const (
+	FLOAT64 LITERAL_TYPE = iota
+	INTEGER
+	STRING
 )
 
 const (
@@ -26,15 +33,17 @@ const (
 	NOT_EQUAL            = "!="
 	SEMICOLON            = ";"
 	ID                   = "id"
-	NUMBER               = "number"
+	LITERAL              = "literal"
 	EOF                  = "EOF"
 	EXPR                 = "expr"
+	DOT                  = "."
 )
 
 type Token struct {
-	Position  int
-	TokenType TOKEN_TYPE
-	Value     interface{}
+	Position    int
+	TokenType   TOKEN_TYPE
+	Value       interface{}
+	LiteralType LITERAL_TYPE
 }
 
 type Source struct {
@@ -42,6 +51,10 @@ type Source struct {
 	Tokens          []Token
 	CurrentPosition int
 	TokenSoFar      string
+}
+
+func (s *Source) getCurrentToken() byte {
+	return s.Content[s.CurrentPosition]
 }
 
 func isnumeric(c rune) bool {
@@ -53,7 +66,7 @@ func isalpha(c rune) bool {
 }
 
 func (s *Source) eatNum() {
-	for s.CurrentPosition < len(s.Content) && (isnumeric(rune(s.Content[s.CurrentPosition]))) {
+	for s.CurrentPosition < len(s.Content) && (isnumeric(rune(s.Content[s.CurrentPosition])) || string(s.getCurrentToken()) == DOT) {
 		s.CurrentPosition += 1
 	}
 }
@@ -114,6 +127,15 @@ func Tokenize(source string) *Source {
 		case ')':
 			s.Tokens = append(s.Tokens, Token{TokenType: RBRACE, Value: ')'})
 			s.eat()
+		case '"':
+			s.eat()
+			before := s.CurrentPosition
+			for s.Content[s.CurrentPosition] != '"' {
+				s.CurrentPosition += 1
+			}
+			s.eat()
+			variable := s.Content[before : s.CurrentPosition-1]
+			s.Tokens = append(s.Tokens, Token{TokenType: LITERAL, Value: variable, LiteralType: STRING})
 		case ';':
 			s.Tokens = append(s.Tokens, Token{TokenType: SEMICOLON, Value: ';'})
 			s.eat()
@@ -130,17 +152,22 @@ func Tokenize(source string) *Source {
 				s.eatNum()
 				after := s.CurrentPosition
 				variable := s.Content[before:after]
-				n, e := strconv.Atoi(variable)
-				if e != nil {
-					log.Fatal("cannot parse source")
+				// fmt.Println(variable)
+				if number, err := strconv.Atoi(variable); err == nil {
+					s.Tokens = append(s.Tokens, Token{TokenType: LITERAL, Value: number, LiteralType: INTEGER})
 				}
-				s.Tokens = append(s.Tokens, Token{TokenType: NUMBER, Value: n})
+
+				if number, err := strconv.ParseFloat(variable, 64); err == nil {
+					s.Tokens = append(s.Tokens, Token{TokenType: LITERAL, Value: number, LiteralType: FLOAT64})
+				} else {
+					log.Fatalf("cannot parse source file\n")
+				}
 			} else {
 				before := s.CurrentPosition
 				s.eatVar()
 				after := s.CurrentPosition
 				variable := s.Content[before:after]
-				s.Tokens = append(s.Tokens, Token{TokenType: ID, Value: variable})
+				s.Tokens = append(s.Tokens, Token{TokenType: ID, Value: variable, LiteralType: STRING})
 			}
 
 		}

@@ -17,21 +17,35 @@ func Visit(node interface{}) interface{} {
 	// fmt.Println("visiting ", node)
 	switch nodeType {
 	case "ast.Number":
-		return node.(Number).Value
+		return node.(Literal)
 	case "ast.BinOP":
 		binNode := node.(BinOP)
 		left := Visit(binNode.left)
 		right := Visit(binNode.right)
-		// fmt.Println(left.(int), binNode.op, right.(int))
-		switch binNode.op {
-		case token.PLUS:
-			return left.(int) + right.(int)
-		case token.MULTIPLY:
-			return left.(int) * right.(int)
-		case token.DIVIDE:
-			return left.(int) / right.(int)
-		case token.MINUS:
-			return left.(int) - right.(int)
+
+		switch left.(Literal).Type {
+		case token.FLOAT64:
+			switch binNode.op {
+			case token.PLUS:
+				return left.(Literal).Value.(float64) + right.(Literal).Value.(float64)
+			case token.MULTIPLY:
+				return left.(Literal).Value.(float64) * right.(Literal).Value.(float64)
+			case token.DIVIDE:
+				return left.(Literal).Value.(float64) / right.(Literal).Value.(float64)
+			case token.MINUS:
+				return left.(Literal).Value.(float64) - right.(Literal).Value.(float64)
+			}
+		case token.INTEGER:
+			switch binNode.op {
+			case token.PLUS:
+				return left.(Literal).Value.(int) + right.(Literal).Value.(int)
+			case token.MULTIPLY:
+				return left.(Literal).Value.(int) * right.(Literal).Value.(int)
+			case token.DIVIDE:
+				return left.(Literal).Value.(int) / right.(Literal).Value.(int)
+			case token.MINUS:
+				return left.(Literal).Value.(int) - right.(Literal).Value.(int)
+			}
 		}
 	}
 	return node

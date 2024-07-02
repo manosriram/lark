@@ -21,15 +21,32 @@ func main() {
 	var statements []ast.Statement
 	for builder.CurrentTokenPointer < len(tokens.Tokens)-1 {
 		tree = builder.Parse()
+		treeType := fmt.Sprintf("%T", tree)
+		// fmt.Println(treeType)
+		// fmt.Println(tree)
 		if tree != nil {
-			statements = append(statements, ast.Statement{
+			statement := ast.Statement{
 				Node: tree,
-			})
+			}
+			switch treeType {
+			case "ast.Assign":
+				statement.StatementType = token.ASSIGN_STATEMENT
+				break
+			case "ast.BinOP":
+				statement.StatementType = token.EXPRESSION_STATEMENT
+				break
+			}
+
+			statements = append(statements, statement)
+
 		}
 	}
 	for _, statement := range statements {
-		result := ast.Evaluate(statement)
-		// fmt.Println(statement)
-		fmt.Println(result)
+		// result := ast.Evaluate(statement)
+		if statement.StatementType == token.ASSIGN_STATEMENT {
+			assign := statement.Node.(ast.Assign)
+			fmt.Println(assign.Id.(ast.Id).Name, assign.Value.(ast.Literal).Value)
+		}
+		// fmt.Println(result)
 	}
 }
