@@ -2,14 +2,19 @@ package ast
 
 import (
 	token "lark/pkg/token"
+	"log"
 )
 
 var current = 0
 
-// type Statement struct {
-// StatementType token.TOKEN_TYPE
-// Node          interface{}
-// }
+type Statement struct {
+	StatementType token.STATEMENT_TYPE
+	Node          interface{}
+}
+
+type Expression struct {
+	Statement
+}
 
 type AstNode struct {
 	Value    interface{}
@@ -26,9 +31,9 @@ type Id struct {
 }
 
 type Assign struct {
+	Statement
 	Id    interface{}
 	Value interface{}
-	Op    token.TOKEN_TYPE
 }
 
 type BinOP struct {
@@ -49,6 +54,13 @@ func NewAstBuilder(tokens []token.Token) *AstBuilder {
 	}
 }
 
+func (a *AstBuilder) getCurrentToken() token.Token {
+	if a.CurrentTokenPointer < len(a.tokens) {
+		return a.tokens[a.CurrentTokenPointer]
+	}
+	return token.Token{}
+}
+
 func (a *AstBuilder) eat() bool {
 	if a.CurrentTokenPointer < len(a.tokens) {
 		a.CurrentTokenPointer++
@@ -58,7 +70,12 @@ func (a *AstBuilder) eat() bool {
 }
 
 func (a *AstBuilder) Parse() interface{} {
-	return a.Expr()
+	expr := a.Expr()
+	if a.getCurrentToken().TokenType != token.SEMICOLON {
+		log.Fatalf("syntax error: missing ;")
+	}
+	a.eat()
+	return expr
 }
 
 func (a *AstBuilder) Expr() interface{} {
@@ -66,15 +83,15 @@ func (a *AstBuilder) Expr() interface{} {
 		return nil
 	}
 	left := a.Term()
-	switch a.tokens[a.CurrentTokenPointer].TokenType {
+	switch a.getCurrentToken().TokenType {
 	case token.PLUS:
-		for a.tokens[a.CurrentTokenPointer].TokenType == token.PLUS {
+		for a.getCurrentToken().TokenType == token.PLUS {
 			a.eat()
 			right := a.Expr()
 			left = BinOP{left: left, right: right, op: token.PLUS}
 		}
 	case token.MINUS:
-		for a.tokens[a.CurrentTokenPointer].TokenType == token.MINUS {
+		for a.getCurrentToken().TokenType == token.MINUS {
 			a.eat()
 			right := a.Expr()
 			left = BinOP{left: left, right: right, op: token.MINUS}
@@ -82,7 +99,7 @@ func (a *AstBuilder) Expr() interface{} {
 	case token.EQUAL:
 		a.eat()
 		right := a.Expr()
-		return Assign{Id: left, Value: right, Op: token.EQUAL}
+		return Assign{Id: left, Value: right}
 	}
 	return left
 }
@@ -103,6 +120,7 @@ func (a *AstBuilder) Term() interface{} {
 		for a.tokens[a.CurrentTokenPointer].TokenType == token.DIVIDE {
 			a.eat()
 			right := a.Term()
+			left := a.Factor()
 			left = BinOP{left: left, right: right, op: token.DIVIDE}
 		}
 	}
@@ -111,13 +129,21 @@ func (a *AstBuilder) Term() interface{} {
 
 func (a *AstBuilder) Factor() interface{} {
 	c := a.CurrentTokenPointer
-	a.eat()
 	switch a.tokens[c].TokenType {
 	case token.NUMBER:
+		a.eat()
 		return Number{Value: a.tokens[c].Value}
 	case token.ID:
+		a.eat()
 		return Id{Name: a.tokens[c].Value.(string)}
-
+	case token.LBRACE:
+		a.eat()
+		expr := a.Expr()
+		if a.getCurrentToken().TokenType != token.RBRACE {
+			log.Fatalf("syntax error: missing ) \n")
+		}
+		a.eat()
+		return expr
 	}
 	return nil
 }

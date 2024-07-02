@@ -18,8 +18,16 @@ func main() {
 
 	builder := ast.NewAstBuilder(tokens.Tokens)
 	var tree interface{}
+	var statements []ast.Statement
 	for builder.CurrentTokenPointer < len(tokens.Tokens)-1 {
 		tree = builder.Parse()
-		fmt.Println(tree)
+		if tree != nil {
+			statements = append(statements, ast.Statement{
+				Node: tree,
+			})
+		}
+	}
+	for _, statement := range statements {
+		fmt.Println(statement)
 	}
 }

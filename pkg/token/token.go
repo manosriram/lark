@@ -7,11 +7,11 @@ import (
 )
 
 type TOKEN_TYPE string
-type NUMBER_TYPE string
+type STATEMENT_TYPE string
 
 const (
-	INT   NUMBER_TYPE = "int"
-	FLOAT NUMBER_TYPE = "float"
+	EXPRESSION       STATEMENT_TYPE = "expression"
+	ASSIGN_STATEMENT                = "assign"
 )
 
 const (
@@ -28,6 +28,7 @@ const (
 	ID                   = "id"
 	NUMBER               = "number"
 	EOF                  = "EOF"
+	EXPR                 = "expr"
 )
 
 type Token struct {
@@ -107,14 +108,12 @@ func Tokenize(source string) *Source {
 		// }
 		// s.eat()
 		// break
-		// case '(':
-		// s.Tokens = append(s.Tokens, LBRACE)
-		// s.eat()
-		// break
-		// case ')':
-		// s.Tokens = append(s.Tokens, RBRACE)
-		// s.eat()
-		// break
+		case '(':
+			s.Tokens = append(s.Tokens, Token{TokenType: LBRACE, Value: '('})
+			s.eat()
+		case ')':
+			s.Tokens = append(s.Tokens, Token{TokenType: RBRACE, Value: ')'})
+			s.eat()
 		case ';':
 			s.Tokens = append(s.Tokens, Token{TokenType: SEMICOLON, Value: ';'})
 			s.eat()
