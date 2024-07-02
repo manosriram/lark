@@ -120,7 +120,7 @@ func (a *AstBuilder) Term() interface{} {
 		for a.tokens[a.CurrentTokenPointer].TokenType == token.DIVIDE {
 			a.eat()
 			right := a.Term()
-			left := a.Factor()
+			// left := a.Factor()
 			left = BinOP{left: left, right: right, op: token.DIVIDE}
 		}
 	}

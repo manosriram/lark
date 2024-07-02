@@ -28,6 +28,8 @@ func main() {
 		}
 	}
 	for _, statement := range statements {
-		fmt.Println(statement)
+		result := ast.Evaluate(statement)
+		// fmt.Println(statement)
+		fmt.Println(result)
 	}
 }
