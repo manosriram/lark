@@ -34,17 +34,14 @@ func Visit(node interface{}) interface{} {
 	switch n := node.(type) {
 	case UnaryOP:
 		op := n.left
-		right := n.right
+		right := Visit(n.right)
 
-		switch op {
-		case token.MINUS:
-			vv := Visit(right)
-			return -vv.(int)
-		case token.PLUS:
-			vv := Visit(right)
-			return +vv.(int)
+		switch right.(type) {
+		case float64:
+			return performOperation(0, right.(float64), op)
+		case int:
+			return performOperation(0, right.(int), op)
 		}
-
 	case BinOP:
 		left := Visit(n.left)
 		right := Visit(n.right)
@@ -74,11 +71,7 @@ func Visit(node interface{}) interface{} {
 	case Literal:
 		nodeValue := n.Value
 		switch v := nodeValue.(type) {
-		case int:
-			return v
-		case float64:
-			return v
-		case string:
+		case int, float64, string:
 			return v
 		default:
 			log.Fatalf("unsupported type %s\n", v)

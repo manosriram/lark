@@ -8,57 +8,6 @@ import (
 
 var current = 0
 
-type Statement struct {
-	StatementType token.STATEMENT_TYPE
-	Node          interface{}
-}
-
-type Expression struct {
-	Statement
-}
-
-type AstNode struct {
-	Value    interface{}
-	NodeType token.TOKEN_TYPE
-}
-
-type Literal struct {
-	Value interface{}
-	Type  token.LITERAL_TYPE
-}
-
-type Number struct {
-	Value interface{}
-	Type  token.LITERAL_TYPE
-}
-
-type Id struct {
-	Name  string
-	Value interface{}
-}
-
-type Assign struct {
-	Statement
-	Id    interface{}
-	Value interface{}
-}
-
-type UnaryOP struct {
-	left  token.TOKEN_TYPE
-	right interface{}
-}
-
-type BinOP struct {
-	left  interface{}
-	right interface{}
-	op    token.TOKEN_TYPE
-}
-
-type AstBuilder struct {
-	tokens              []token.Token
-	CurrentTokenPointer int
-}
-
 func NewAstBuilder(tokens []token.Token) *AstBuilder {
 	return &AstBuilder{
 		tokens:              tokens,
@@ -93,45 +42,30 @@ func (a *AstBuilder) Expr() interface{} {
 	}
 	left := a.Term()
 	switch a.getCurrentToken().TokenType {
-	case token.PLUS:
-		for a.getCurrentToken().TokenType == token.PLUS {
-			a.eat(token.PLUS)
-			right := a.Expr()
-			left = BinOP{left: left, right: right, op: token.PLUS}
-		}
-	case token.MINUS:
-		for a.getCurrentToken().TokenType == token.MINUS {
-			a.eat(token.MINUS)
-			right := a.Expr()
-			left = BinOP{left: left, right: right, op: token.MINUS}
+	case token.PLUS, token.MINUS:
+		for a.getCurrentToken().TokenType == token.PLUS || a.getCurrentToken().TokenType == token.MINUS {
+			op := a.getCurrentToken().TokenType
+			a.eat(op)
+			right := a.Term()
+			left = BinOP{left: left, right: right, op: op}
 		}
 	case token.EQUAL:
 		a.eat(token.EQUAL)
 		right := a.Expr()
 		a.eat(token.SEMICOLON)
+		// return Statement{Node: Assign{Id: left, Value: right}, StatementType: token.ASSIGN_STATEMENT}
 		return Assign{Id: left, Value: right}
 	}
 	return left
 }
 
 func (a *AstBuilder) Term() interface{} {
-	if a.CurrentTokenPointer >= len(a.tokens) {
-		return nil
-	}
 	left := a.Factor()
-	switch a.tokens[a.CurrentTokenPointer].TokenType {
-	case token.MULTIPLY:
-		for a.tokens[a.CurrentTokenPointer].TokenType == token.MULTIPLY {
-			a.eat(token.MULTIPLY)
-			right := a.Term()
-			left = BinOP{left: left, right: right, op: token.MULTIPLY}
-		}
-	case token.DIVIDE:
-		for a.tokens[a.CurrentTokenPointer].TokenType == token.DIVIDE {
-			a.eat(token.DIVIDE)
-			right := a.Term()
-			left = BinOP{left: left, right: right, op: token.DIVIDE}
-		}
+	for a.getCurrentToken().TokenType == token.MULTIPLY || a.getCurrentToken().TokenType == token.DIVIDE {
+		op := a.getCurrentToken().TokenType
+		a.eat(op)
+		right := a.Factor()
+		left = BinOP{left: left, right: right, op: op}
 	}
 	return left
 }
@@ -141,6 +75,7 @@ func (a *AstBuilder) Factor() interface{} {
 	switch a.tokens[c].TokenType {
 	case token.MINUS:
 		a.eat(token.MINUS)
+		// return Expression{Node: UnaryOP{left: token.MINUS, right: a.Expr()}, ExpressionType: token.UNARY_OP}
 		return UnaryOP{left: token.MINUS, right: a.Expr()}
 	case token.LITERAL:
 		a.eat(token.LITERAL)
