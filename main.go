@@ -17,9 +17,7 @@ func main() {
 	}
 
 	symbolTable = make(map[string]interface{})
-
 	tokens := token.Tokenize(string(content))
-
 	builder := ast.NewAstBuilder(tokens.Tokens)
 	var tree interface{}
 	var statements []ast.Statement
