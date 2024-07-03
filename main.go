@@ -8,11 +8,15 @@ import (
 	"os"
 )
 
+var symbolTable map[string]interface{}
+
 func main() {
 	content, err := os.ReadFile("source.lark")
 	if err != nil {
 		log.Fatal("error reading source file")
 	}
+
+	symbolTable = make(map[string]interface{})
 
 	tokens := token.Tokenize(string(content))
 
@@ -22,8 +26,6 @@ func main() {
 	for builder.CurrentTokenPointer < len(tokens.Tokens)-1 {
 		tree = builder.Parse()
 		treeType := fmt.Sprintf("%T", tree)
-		// fmt.Println(treeType)
-		// fmt.Println(tree)
 		if tree != nil {
 			statement := ast.Statement{
 				Node: tree,
@@ -42,11 +44,19 @@ func main() {
 		}
 	}
 	for _, statement := range statements {
-		// result := ast.Evaluate(statement)
-		if statement.StatementType == token.ASSIGN_STATEMENT {
+
+		result := ast.Evaluate(statement)
+		switch statement.StatementType {
+		case token.ASSIGN_STATEMENT:
 			assign := statement.Node.(ast.Assign)
-			fmt.Println(assign.Id.(ast.Id).Name, assign.Value.(ast.Literal).Value)
+			id := assign.Id.(ast.Id).Name
+			value := result
+			symbolTable[id] = value
+			break
 		}
-		// fmt.Println(result)
+	}
+
+	for k, v := range symbolTable {
+		fmt.Printf("var_name: %s, var_value: %v\n", k, v)
 	}
 }

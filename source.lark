@@ -1,1 +1,4 @@
-a = "mano";;
+a="mano";
+b="manosriram";
+c=200.5+123.1;
+z = 10;

@@ -112,15 +112,6 @@ func Tokenize(source string) *Source {
 		case '=':
 			s.Tokens = append(s.Tokens, Token{TokenType: EQUAL, Value: '='})
 			s.eat()
-		// case '!':
-		// if string(s.Content[s.CurrentPosition+1]) == "=" {
-		// s.Tokens = append(s.Tokens, NOT_EQUAL)
-		// s.eat()
-		// } else {
-		// s.Tokens = append(s.Tokens, NOT)
-		// }
-		// s.eat()
-		// break
 		case '(':
 			s.Tokens = append(s.Tokens, Token{TokenType: LBRACE, Value: '('})
 			s.eat()
@@ -136,6 +127,7 @@ func Tokenize(source string) *Source {
 			s.eat()
 			variable := s.Content[before : s.CurrentPosition-1]
 			s.Tokens = append(s.Tokens, Token{TokenType: LITERAL, Value: variable, LiteralType: STRING})
+			break
 		case ';':
 			s.Tokens = append(s.Tokens, Token{TokenType: SEMICOLON, Value: ';'})
 			s.eat()
@@ -146,18 +138,15 @@ func Tokenize(source string) *Source {
 		case '\n':
 			s.eat()
 			break
-		default: // variable decl
+		default:
 			if unicode.IsNumber(rune(s.Content[s.CurrentPosition])) {
 				before := s.CurrentPosition
 				s.eatNum()
 				after := s.CurrentPosition
 				variable := s.Content[before:after]
-				// fmt.Println(variable)
 				if number, err := strconv.Atoi(variable); err == nil {
 					s.Tokens = append(s.Tokens, Token{TokenType: LITERAL, Value: number, LiteralType: INTEGER})
-				}
-
-				if number, err := strconv.ParseFloat(variable, 64); err == nil {
+				} else if number, err := strconv.ParseFloat(variable, 64); err == nil {
 					s.Tokens = append(s.Tokens, Token{TokenType: LITERAL, Value: number, LiteralType: FLOAT64})
 				} else {
 					log.Fatalf("cannot parse source file\n")

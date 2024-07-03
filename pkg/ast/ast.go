@@ -68,21 +68,23 @@ func (a *AstBuilder) getCurrentToken() token.Token {
 	return token.Token{}
 }
 
-func (a *AstBuilder) eat() bool {
-	if a.CurrentTokenPointer < len(a.tokens) {
+func (a *AstBuilder) eat(t token.TOKEN_TYPE) bool {
+	if a.CurrentTokenPointer < len(a.tokens) && a.getCurrentToken().TokenType == t {
 		a.CurrentTokenPointer++
 		return true
+	} else {
+		log.Fatalf("syntax error\n")
 	}
 	return false
 }
 
 func (a *AstBuilder) Parse() interface{} {
 	expr := a.Expr()
-	if a.getCurrentToken().TokenType != token.SEMICOLON {
-		// fmt.Println(a.getCurrentToken().Value)
-		log.Fatalf("syntax error: missing ;")
-	}
-	a.eat()
+	// if a.getCurrentToken().TokenType != token.SEMICOLON {
+	// fmt.Println(a.getCurrentToken().Value)
+	// log.Fatalf("syntax error: missing ;")
+	// }
+	// a.eat()
 	return expr
 }
 
@@ -94,20 +96,20 @@ func (a *AstBuilder) Expr() interface{} {
 	switch a.getCurrentToken().TokenType {
 	case token.PLUS:
 		for a.getCurrentToken().TokenType == token.PLUS {
-			a.eat()
+			a.eat(token.PLUS)
 			right := a.Expr()
 			left = BinOP{left: left, right: right, op: token.PLUS}
 		}
 	case token.MINUS:
 		for a.getCurrentToken().TokenType == token.MINUS {
-			a.eat()
+			a.eat(token.MINUS)
 			right := a.Expr()
 			left = BinOP{left: left, right: right, op: token.MINUS}
 		}
 	case token.EQUAL:
-		a.eat()
+		a.eat(token.EQUAL)
 		right := a.Expr()
-		a.eat()
+		a.eat(token.SEMICOLON)
 		return Assign{Id: left, Value: right}
 	}
 	return left
@@ -121,15 +123,14 @@ func (a *AstBuilder) Term() interface{} {
 	switch a.tokens[a.CurrentTokenPointer].TokenType {
 	case token.MULTIPLY:
 		for a.tokens[a.CurrentTokenPointer].TokenType == token.MULTIPLY {
-			a.eat()
+			a.eat(token.MULTIPLY)
 			right := a.Term()
 			left = BinOP{left: left, right: right, op: token.MULTIPLY}
 		}
 	case token.DIVIDE:
 		for a.tokens[a.CurrentTokenPointer].TokenType == token.DIVIDE {
-			a.eat()
+			a.eat(token.DIVIDE)
 			right := a.Term()
-			// left := a.Factor()
 			left = BinOP{left: left, right: right, op: token.DIVIDE}
 		}
 	}
@@ -140,18 +141,17 @@ func (a *AstBuilder) Factor() interface{} {
 	c := a.CurrentTokenPointer
 	switch a.tokens[c].TokenType {
 	case token.LITERAL:
-		a.eat()
+		a.eat(token.LITERAL)
 		return Literal{Value: a.tokens[c].Value, Type: a.tokens[c].LiteralType}
 	case token.ID:
-		a.eat()
+		a.eat(token.ID)
 		return Id{Name: a.tokens[c].Value.(string)}
+	case token.SEMICOLON:
+		a.eat(token.SEMICOLON)
 	case token.LBRACE:
-		a.eat()
+		a.eat(token.LBRACE)
 		expr := a.Expr()
-		if a.getCurrentToken().TokenType != token.RBRACE {
-			log.Fatalf("syntax error: missing ) \n")
-		}
-		a.eat()
+		a.eat(token.RBRACE)
 		return expr
 	}
 	fmt.Println("received nil ", a.tokens[c].TokenType)
