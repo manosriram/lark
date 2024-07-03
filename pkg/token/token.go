@@ -151,12 +151,14 @@ func Tokenize(source string) *Source {
 				} else {
 					log.Fatalf("cannot parse source file\n")
 				}
-			} else {
+			} else if unicode.IsLetter(rune(s.Content[s.CurrentPosition])) {
 				before := s.CurrentPosition
 				s.eatVar()
 				after := s.CurrentPosition
 				variable := s.Content[before:after]
 				s.Tokens = append(s.Tokens, Token{TokenType: ID, Value: variable, LiteralType: STRING})
+			} else {
+				log.Fatalf("unsupported type %v\n", string(s.Content[s.CurrentPosition]))
 			}
 
 		}
