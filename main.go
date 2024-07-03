@@ -38,20 +38,16 @@ func main() {
 				statement.StatementType = token.EXPRESSION_STATEMENT
 				break
 			}
-
 			statements = append(statements, statement)
-
 		}
 	}
 	for _, statement := range statements {
-
 		result := ast.Evaluate(statement)
 		switch statement.StatementType {
 		case token.ASSIGN_STATEMENT:
 			assign := statement.Node.(ast.Assign)
 			id := assign.Id.(ast.Id).Name
-			value := result
-			symbolTable[id] = value
+			symbolTable[id] = result
 			break
 		}
 	}

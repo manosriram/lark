@@ -79,13 +79,7 @@ func (a *AstBuilder) eat(t token.TOKEN_TYPE) bool {
 }
 
 func (a *AstBuilder) Parse() interface{} {
-	expr := a.Expr()
-	// if a.getCurrentToken().TokenType != token.SEMICOLON {
-	// fmt.Println(a.getCurrentToken().Value)
-	// log.Fatalf("syntax error: missing ;")
-	// }
-	// a.eat()
-	return expr
+	return a.Expr()
 }
 
 func (a *AstBuilder) Expr() interface{} {
