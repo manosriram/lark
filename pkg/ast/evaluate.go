@@ -8,20 +8,48 @@ import (
 
 var store map[string]interface{}
 
+type RealNumber interface {
+	int | float64
+}
+
+func performOperation[T RealNumber](left, right T, op token.TOKEN_TYPE) T {
+	switch op {
+	case token.PLUS:
+		return left + right
+	case token.MINUS:
+		return left - right
+	case token.MULTIPLY:
+		return left * right
+	case token.DIVIDE:
+		return left / right
+	default:
+		panic(fmt.Sprintf("unsupported operation: %v", op))
+	}
+}
 func Evaluate(s Statement) interface{} {
 	return Visit(s.Node)
 }
 
 func Visit(node interface{}) interface{} {
-	nodeType := fmt.Sprintf("%T", node)
-	switch nodeType {
-	case "ast.BinOP":
-		left := node.(BinOP).left
-		right := node.(BinOP).right
-		op := node.(BinOP).op
-		left = Visit(left)
-		right = Visit(right)
+	switch n := node.(type) {
+	case UnaryOP:
+		op := n.left
+		right := n.right
 
+		switch op {
+		case token.MINUS:
+			vv := Visit(right)
+			return -vv.(int)
+		case token.PLUS:
+			vv := Visit(right)
+			return +vv.(int)
+		}
+
+	case BinOP:
+		left := Visit(n.left)
+		right := Visit(n.right)
+
+		// TODO: make this better
 		leftType := fmt.Sprintf("%T", left)
 		rightType := fmt.Sprintf("%T", right)
 		if leftType == "string" || rightType == "string" {
@@ -30,44 +58,33 @@ func Visit(node interface{}) interface{} {
 		if leftType != rightType {
 			log.Fatalf("expression type mismatch\n")
 		}
-		if leftType == "int" {
-			switch op {
-			case token.PLUS:
-				return left.(int) + right.(int)
-			case token.MINUS:
-				return left.(int) - right.(int)
-			case token.MULTIPLY:
-				return left.(int) * right.(int)
-			case token.DIVIDE:
-				return left.(int) / right.(int)
+		switch left := left.(type) {
+		case int:
+			if right, ok := right.(int); ok {
+				return performOperation(left, right, n.op)
 			}
-		} else if leftType == "float64" {
-			switch op {
-			case token.PLUS:
-				return left.(float64) + right.(float64)
-			case token.MINUS:
-				return left.(float64) - right.(float64)
-			case token.MULTIPLY:
-				return left.(float64) * right.(float64)
-			case token.DIVIDE:
-				return left.(float64) / right.(float64)
+		case float64:
+			if right, ok := right.(float64); ok {
+				return performOperation(left, right, n.op)
 			}
 		}
 
-	case "ast.Assign":
-		n := node.(Assign)
+	case Assign:
 		return Visit(n.Value)
-	case "ast.Literal":
-		nodeValue := node.(Literal).Value
-		nodeType := fmt.Sprintf("%T", nodeValue)
-		switch nodeType {
-		case "int":
-			return nodeValue.(int)
-		case "float64":
-			return nodeValue.(float64)
-		case "string":
-			return nodeValue.(string)
+	case Literal:
+		nodeValue := n.Value
+		switch v := nodeValue.(type) {
+		case int:
+			return v
+		case float64:
+			return v
+		case string:
+			return v
+		default:
+			log.Fatalf("unsupported type %s\n", v)
+
 		}
+		return node
 	}
 	return node
 }

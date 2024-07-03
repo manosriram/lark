@@ -43,6 +43,11 @@ type Assign struct {
 	Value interface{}
 }
 
+type UnaryOP struct {
+	left  token.TOKEN_TYPE
+	right interface{}
+}
+
 type BinOP struct {
 	left  interface{}
 	right interface{}
@@ -79,13 +84,7 @@ func (a *AstBuilder) eat(t token.TOKEN_TYPE) bool {
 }
 
 func (a *AstBuilder) Parse() interface{} {
-	expr := a.Expr()
-	// if a.getCurrentToken().TokenType != token.SEMICOLON {
-	// fmt.Println(a.getCurrentToken().Value)
-	// log.Fatalf("syntax error: missing ;")
-	// }
-	// a.eat()
-	return expr
+	return a.Expr()
 }
 
 func (a *AstBuilder) Expr() interface{} {
@@ -140,6 +139,9 @@ func (a *AstBuilder) Term() interface{} {
 func (a *AstBuilder) Factor() interface{} {
 	c := a.CurrentTokenPointer
 	switch a.tokens[c].TokenType {
+	case token.MINUS:
+		a.eat(token.MINUS)
+		return UnaryOP{left: token.MINUS, right: a.Expr()}
 	case token.LITERAL:
 		a.eat(token.LITERAL)
 		return Literal{Value: a.tokens[c].Value, Type: a.tokens[c].LiteralType}
