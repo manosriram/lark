@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"lark/pkg/ast"
 	token "lark/pkg/token"
+	"lark/pkg/types"
 	"log"
 	"os"
 )
@@ -19,34 +20,40 @@ func main() {
 	symbolTable = make(map[string]interface{})
 	tokens := token.Tokenize(string(content))
 	builder := ast.NewAstBuilder(tokens.Tokens)
-	var tree interface{}
-	var statements []ast.Statement
+	var tree types.Node
+	// var statements []types.Statement
+	var nodes []types.Node
 	for builder.CurrentTokenPointer < len(tokens.Tokens)-1 {
 		tree = builder.Parse()
-		treeType := fmt.Sprintf("%T", tree)
+		// treeType := fmt.Sprintf("%T", tree)
 		if tree != nil {
-			statement := ast.Statement{
-				Node: tree,
-			}
-			switch treeType {
-			case "ast.Assign":
-				statement.StatementType = token.ASSIGN_STATEMENT
-				break
-			case "ast.BinOP":
-				statement.StatementType = token.EXPRESSION_STATEMENT
-				break
-			}
-			statements = append(statements, statement)
+			// statement := types.Statement{
+			// Node: tree,
+			// }
+			nodes = append(nodes, tree)
+			// switch treeType := tree.(type) {
+			// case types.BinOP:
+			// break
+			// }
+			// statements = append(statements, statement)
 		}
 	}
-	for _, statement := range statements {
-		result := ast.Evaluate(statement)
-		switch statement.StatementType {
-		case token.ASSIGN_STATEMENT:
-			assign := statement.Node.(ast.Assign)
-			id := assign.Id.(ast.Id).Name
-			symbolTable[id] = result
-			break
+	fmt.Println(nodes)
+	for _, node := range nodes {
+		result := ast.Evaluate(node)
+		fmt.Println(result)
+		switch nType := node.(type) {
+		case types.Statement:
+			switch node.(types.Statement).StatementType {
+			case types.AssignType:
+				fmt.Println("n = ", node.(types.Statement).Node)
+				// assign := node.(types.Assign).Id.String()
+				// symbolTable[assign] = result
+				break
+
+			}
+		default:
+			fmt.Println(nType)
 		}
 	}
 

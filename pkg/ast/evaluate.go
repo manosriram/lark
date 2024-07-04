@@ -2,7 +2,7 @@ package ast
 
 import (
 	"fmt"
-	token "lark/pkg/token"
+	types "lark/pkg/types"
 	"log"
 )
 
@@ -12,29 +12,36 @@ type RealNumber interface {
 	int | float64
 }
 
-func performOperation[T RealNumber](left, right T, op token.TOKEN_TYPE) T {
+func performOperation[T RealNumber](left, right T, op types.TOKEN_TYPE) T {
 	switch op {
-	case token.PLUS:
+	case types.PLUS:
 		return left + right
-	case token.MINUS:
+	case types.MINUS:
 		return left - right
-	case token.MULTIPLY:
+	case types.MULTIPLY:
 		return left * right
-	case token.DIVIDE:
+	case types.DIVIDE:
 		return left / right
 	default:
 		panic(fmt.Sprintf("unsupported operation: %v", op))
 	}
 }
-func Evaluate(s Statement) interface{} {
-	return Visit(s.Node)
+func Evaluate(s types.Node) interface{} {
+	return Visit(s)
 }
 
-func Visit(node interface{}) interface{} {
+func Visit(node types.Node) interface{} {
+	zz := fmt.Sprintf("%T", node)
+	fmt.Println(zz)
 	switch n := node.(type) {
-	case UnaryOP:
-		op := n.left
-		right := Visit(n.right)
+	case types.Statement:
+		return Visit(node.(types.Statement).Node)
+	case types.Expression:
+		return Visit(node.(types.Expression).Node)
+
+	case types.UnaryOP:
+		op := n.Left
+		right := Visit(n.Right)
 
 		switch right.(type) {
 		case float64:
@@ -42,9 +49,9 @@ func Visit(node interface{}) interface{} {
 		case int:
 			return performOperation(0, right.(int), op)
 		}
-	case BinOP:
-		left := Visit(n.left)
-		right := Visit(n.right)
+	case types.BinOP:
+		left := Visit(n.Left)
+		right := Visit(n.Right)
 
 		// TODO: make this better
 		leftType := fmt.Sprintf("%T", left)
@@ -57,19 +64,23 @@ func Visit(node interface{}) interface{} {
 		}
 		switch left := left.(type) {
 		case int:
+			fmt.Println("inntt")
 			if right, ok := right.(int); ok {
-				return performOperation(left, right, n.op)
+				return performOperation(left, right, n.Op)
 			}
 		case float64:
 			if right, ok := right.(float64); ok {
-				return performOperation(left, right, n.op)
+				return performOperation(left, right, n.Op)
 			}
 		}
 
-	case Assign:
+	case types.Assign:
 		return Visit(n.Value)
-	case Literal:
-		nodeValue := n.Value
+	case types.Literal:
+		nodeValue := n.Value.(types.Literal).Value
+		// zz := fmt.Sprintf("%T", nodeValue)
+		// fmt.Println("nv = ", nodeValue.(types.Literal).Value)
+
 		switch v := nodeValue.(type) {
 		case int, float64, string:
 			return v
