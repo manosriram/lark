@@ -50,7 +50,7 @@ func (a *AstBuilder) Expr() types.Node {
 	case types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.EQUALS, types.NOT_EQUAL:
 		op := a.getCurrentToken().TokenType
 		a.eat(op)
-		right := a.Term()
+		right := a.Expr()
 		left = types.BinOP{Left: left, Right: right, Op: op}
 	case types.PLUS, types.MINUS:
 		for a.getCurrentToken().TokenType == types.PLUS || a.getCurrentToken().TokenType == types.MINUS {
@@ -98,22 +98,6 @@ func (a *AstBuilder) Factor() types.Node {
 		expr := a.Expr()
 		a.eat(types.RBRACE)
 		return expr
-		// case types.EQUALS:
-		// a.eat(types.EQUALS)
-		// case types.GREATER:
-		// fmt.Println("got ", a.tokens[c].TokenType)
-		// a.eat(types.GREATER)
-		// return types.UnaryOP{Left: types.GREATER}
-		// case types.GREATER_OR_EQUAL:
-		// a.eat(types.GREATER_OR_EQUAL)
-		// case types.LESSER:
-		// a.eat(types.LESSER)
-		// case types.LESSER_OR_EQUAL:
-		// a.eat(types.LESSER_OR_EQUAL)
-		// case types.NOT:
-		// a.eat(types.NOT)
-		// case types.NOT_EQUAL:
-		// a.eat(types.NOT_EQUAL)
 	}
 	fmt.Println("received nil ", a.tokens[c].TokenType == types.GREATER)
 	return nil
