@@ -52,14 +52,13 @@ func (a *AstBuilder) Expr() types.Node {
 			op := a.getCurrentToken().TokenType
 			a.eat(op)
 			right := a.Term()
-			left = types.Expression{Node: types.BinOP{Left: left, Right: right, Op: op}, ExpressionType: types.BinOpType}
+			left = types.BinOP{Left: left, Right: right, Op: op}
 		}
 	case types.EQUAL:
 		a.eat(types.EQUAL)
 		right := a.Expr()
 		a.eat(types.SEMICOLON)
-		// return Statement{Node: Assign{Id: left, Value: right}, StatementType: types.ASSIGN_STATEMENT}
-		return types.Statement{Node: types.Assign{Id: left, Value: right}, StatementType: types.AssignType}
+		return types.Assign{Id: left, Value: right}
 	}
 	return left
 }
@@ -70,8 +69,7 @@ func (a *AstBuilder) Term() types.Node {
 		op := a.getCurrentToken().TokenType
 		a.eat(op)
 		right := a.Factor()
-		// left = types.BinOP{left: left, right: right, op: op}
-		left = types.Expression{Node: types.BinOP{Left: left, Right: right, Op: op}, ExpressionType: types.BinOpType}
+		left = types.BinOP{Left: left, Right: right, Op: op}
 	}
 	return left
 }
@@ -81,16 +79,13 @@ func (a *AstBuilder) Factor() types.Node {
 	switch a.tokens[c].TokenType {
 	case types.MINUS:
 		a.eat(types.MINUS)
-		// return types.Expression{Node: types.UnaryOP{left: types.MINUS, right: a.Expr()}, types.ExpressionType: types.UNARY_OP}
-		return types.Expression{Node: types.UnaryOP{Left: types.MINUS, Right: a.Expr()}, ExpressionType: types.UnaryOpType}
-		// return types.UnaryOP{left: types.MINUS, right: a.Expr()}
+		return types.UnaryOP{Left: types.MINUS, Right: a.Expr()}
 	case types.LITERAL:
 		a.eat(types.LITERAL)
-		return types.Expression{Node: types.Literal{Value: a.tokens[c].Value, Type: a.tokens[c].LiteralType}}
-		// return types.Literal{Value: a.typess[c].Value, Type: a.typess[c].types.LiteralType}
+		return types.Literal{Value: a.tokens[c].Value, Type: a.tokens[c].LiteralType}
 	case types.ID:
 		a.eat(types.ID)
-		return types.Expression{Node: types.Id{Value: a.tokens[c].Value}}
+		return types.Id{Name: a.tokens[c].Value.(types.Literal).Value.(string)}
 	case types.SEMICOLON:
 		a.eat(types.SEMICOLON)
 	case types.LBRACE:
@@ -100,5 +95,5 @@ func (a *AstBuilder) Factor() types.Node {
 		return expr
 	}
 	fmt.Println("received nil ", a.tokens[c].TokenType)
-	return types.Expression{}
+	return nil
 }

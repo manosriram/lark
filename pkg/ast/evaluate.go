@@ -6,7 +6,9 @@ import (
 	"log"
 )
 
-var store map[string]interface{}
+type Evaluator struct {
+	SymbolTable map[string]interface{}
+}
 
 type RealNumber interface {
 	int | float64
@@ -26,22 +28,26 @@ func performOperation[T RealNumber](left, right T, op types.TOKEN_TYPE) T {
 		panic(fmt.Sprintf("unsupported operation: %v", op))
 	}
 }
-func Evaluate(s types.Node) interface{} {
-	return Visit(s)
+
+type EvalResult struct {
+	Value interface{}
+	Type  string
 }
 
-func Visit(node types.Node) interface{} {
-	zz := fmt.Sprintf("%T", node)
-	fmt.Println(zz)
+func (e *Evaluator) Evaluate(s types.Node) interface{} {
+	return e.Visit(s)
+}
+
+func (e *Evaluator) Visit(node types.Node) interface{} {
 	switch n := node.(type) {
 	case types.Statement:
-		return Visit(node.(types.Statement).Node)
+		return e.Visit(node.(types.Statement).Node)
 	case types.Expression:
-		return Visit(node.(types.Expression).Node)
+		return e.Visit(node.(types.Expression).Node)
 
 	case types.UnaryOP:
 		op := n.Left
-		right := Visit(n.Right)
+		right := e.Visit(n.Right)
 
 		switch right.(type) {
 		case float64:
@@ -50,8 +56,8 @@ func Visit(node types.Node) interface{} {
 			return performOperation(0, right.(int), op)
 		}
 	case types.BinOP:
-		left := Visit(n.Left)
-		right := Visit(n.Right)
+		left := e.Visit(n.Left)
+		right := e.Visit(n.Right)
 
 		// TODO: make this better
 		leftType := fmt.Sprintf("%T", left)
@@ -64,7 +70,6 @@ func Visit(node types.Node) interface{} {
 		}
 		switch left := left.(type) {
 		case int:
-			fmt.Println("inntt")
 			if right, ok := right.(int); ok {
 				return performOperation(left, right, n.Op)
 			}
@@ -75,12 +80,13 @@ func Visit(node types.Node) interface{} {
 		}
 
 	case types.Assign:
-		return Visit(n.Value)
+		right := e.Visit(n.Value)
+		e.SymbolTable[n.Id.(types.Id).Name] = right
+		return right
+	case types.Id:
+		return n.Value
 	case types.Literal:
 		nodeValue := n.Value.(types.Literal).Value
-		// zz := fmt.Sprintf("%T", nodeValue)
-		// fmt.Println("nv = ", nodeValue.(types.Literal).Value)
-
 		switch v := nodeValue.(type) {
 		case int, float64, string:
 			return v

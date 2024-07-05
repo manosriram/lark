@@ -71,6 +71,18 @@ type Node interface {
 	String() string
 }
 
+type Compound struct {
+	Children []Node
+}
+
+func (s Compound) NodeType() string {
+	return "compound"
+}
+
+func (e Compound) String() string {
+	return "compound"
+}
+
 type Statement struct {
 	Node
 	StatementType

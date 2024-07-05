@@ -17,47 +17,27 @@ func main() {
 		log.Fatal("error reading source file")
 	}
 
+	root := types.Compound{Children: []types.Node{}}
+
 	symbolTable = make(map[string]interface{})
 	tokens := token.Tokenize(string(content))
 	builder := ast.NewAstBuilder(tokens.Tokens)
 	var tree types.Node
-	// var statements []types.Statement
-	var nodes []types.Node
 	for builder.CurrentTokenPointer < len(tokens.Tokens)-1 {
 		tree = builder.Parse()
-		// treeType := fmt.Sprintf("%T", tree)
 		if tree != nil {
-			// statement := types.Statement{
-			// Node: tree,
-			// }
-			nodes = append(nodes, tree)
-			// switch treeType := tree.(type) {
-			// case types.BinOP:
-			// break
-			// }
-			// statements = append(statements, statement)
+			root.Children = append(root.Children, tree)
 		}
 	}
-	fmt.Println(nodes)
-	for _, node := range nodes {
-		result := ast.Evaluate(node)
-		fmt.Println(result)
-		switch nType := node.(type) {
-		case types.Statement:
-			switch node.(types.Statement).StatementType {
-			case types.AssignType:
-				fmt.Println("n = ", node.(types.Statement).Node)
-				// assign := node.(types.Assign).Id.String()
-				// symbolTable[assign] = result
-				break
-
-			}
-		default:
-			fmt.Println(nType)
-		}
+	evaluator := ast.Evaluator{
+		SymbolTable: symbolTable,
 	}
 
-	for k, v := range symbolTable {
+	for _, node := range root.Children {
+		evaluator.Evaluate(node)
+	}
+
+	for k, v := range evaluator.SymbolTable {
 		fmt.Printf("var_name: %s, var_value: %v\n", k, v)
 	}
 }
