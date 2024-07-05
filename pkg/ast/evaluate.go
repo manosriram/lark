@@ -4,14 +4,39 @@ import (
 	"fmt"
 	types "lark/pkg/types"
 	"log"
+
+	"golang.org/x/exp/constraints"
 )
 
 type Evaluator struct {
 	SymbolTable map[string]interface{}
 }
 
+type Comparator interface {
+	constraints.Ordered
+}
+
 type RealNumber interface {
 	int | float64
+}
+
+func performComparisionOperation[T Comparator](left, right T, op types.TOKEN_TYPE) bool {
+	switch op {
+	case types.GREATER:
+		return left > right
+	case types.GREATER_OR_EQUAL:
+		return left >= right
+	case types.LESSER:
+		return left < right
+	case types.LESSER_OR_EQUAL:
+		return left <= right
+	case types.EQUALS:
+		return left == right
+	case types.NOT_EQUAL:
+		return left != right
+	default:
+		panic(fmt.Sprintf("unsupported operation: %v", op))
+	}
 }
 
 func performOperation[T RealNumber](left, right T, op types.TOKEN_TYPE) T {
@@ -71,11 +96,21 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		switch left := left.(type) {
 		case int:
 			if right, ok := right.(int); ok {
-				return performOperation(left, right, n.Op)
+				switch n.Op {
+				case types.PLUS, types.MINUS, types.MULTIPLY, types.DIVIDE:
+					return performOperation(left, right, n.Op)
+				default:
+					return performComparisionOperation(left, right, n.Op)
+				}
 			}
 		case float64:
 			if right, ok := right.(float64); ok {
-				return performOperation(left, right, n.Op)
+				switch n.Op {
+				case types.PLUS, types.MINUS, types.MULTIPLY, types.DIVIDE:
+					return performOperation(left, right, n.Op)
+				default:
+					return performComparisionOperation(left, right, n.Op)
+				}
 			}
 		}
 

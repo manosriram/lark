@@ -25,21 +25,28 @@ const (
 )
 
 const (
-	PLUS      TOKEN_TYPE = "+"
-	MINUS                = "-"
-	MULTIPLY             = "*"
-	DIVIDE               = "/"
-	LBRACE               = "("
-	RBRACE               = ")"
-	EQUAL                = "="
-	NOT                  = "!"
-	NOT_EQUAL            = "!="
-	SEMICOLON            = ";"
-	ID                   = "id"
-	LITERAL              = "literal"
-	EOF                  = "EOF"
-	EXPR                 = "expr"
-	DOT                  = "."
+	PLUS     TOKEN_TYPE = "+"
+	MINUS               = "-"
+	MULTIPLY            = "*"
+	DIVIDE              = "/"
+	LBRACE              = "("
+	RBRACE              = ")"
+	ASSIGN              = "="
+
+	GREATER          = ">"
+	GREATER_OR_EQUAL = ">="
+	LESSER           = "<"
+	LESSER_OR_EQUAL  = "<="
+	NOT              = "!"
+	NOT_EQUAL        = "!="
+	EQUALS           = "=="
+
+	SEMICOLON = ";"
+	ID        = "id"
+	LITERAL   = "literal"
+	EOF       = "EOF"
+	EXPR      = "expr"
+	DOT       = "."
 )
 
 type Token struct {

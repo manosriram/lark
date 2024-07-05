@@ -59,11 +59,9 @@ func Tokenize(source string) *Source {
 		charAtPosition := s.Content[s.CurrentPosition]
 		switch charAtPosition {
 		case '+':
-			// s.Tokens = append(s.Tokens, Token{TokenType: PLUS, Value: '+'})
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.PLUS, Value: types.Literal{Value: '+', Type: types.OPERATOR}})
 			s.eat()
 		case '-':
-			// s.Tokens = append(s.Tokens, Token{TokenType: MINUS, Value: '-'})
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.MINUS, Value: types.Literal{Value: '-', Type: types.OPERATOR}})
 			s.eat()
 		case '*':
@@ -73,14 +71,47 @@ func Tokenize(source string) *Source {
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.DIVIDE, Value: types.Literal{Value: '/', Type: types.OPERATOR}})
 			s.eat()
 		case '=':
-			s.Tokens = append(s.Tokens, types.Token{TokenType: types.EQUAL, Value: types.Literal{Value: '=', Type: types.OPERATOR}})
 			s.eat()
+			switch s.Content[s.CurrentPosition] {
+			case '=':
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.EQUALS, Value: types.Literal{Value: "==", Type: types.OPERATOR}})
+				s.eat()
+			default:
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.ASSIGN, Value: types.Literal{Value: '=', Type: types.OPERATOR}})
+			}
 		case '(':
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.LBRACE, Value: types.Literal{Value: '(', Type: types.OPERATOR}})
 			s.eat()
 		case ')':
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.RBRACE, Value: types.Literal{Value: ')', Type: types.OPERATOR}})
 			s.eat()
+		case '!':
+			s.eat()
+			switch s.Content[s.CurrentPosition] {
+			case '=':
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.NOT_EQUAL, Value: types.Literal{Value: "!=", Type: types.OPERATOR}})
+				s.eat()
+			default:
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.NOT, Value: types.Literal{Value: "!", Type: types.OPERATOR}})
+			}
+		case '<':
+			s.eat()
+			switch s.Content[s.CurrentPosition] {
+			case '=':
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LESSER_OR_EQUAL, Value: types.Literal{Value: "<=", Type: types.OPERATOR}})
+				s.eat()
+			default:
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LESSER, Value: types.Literal{Value: "<", Type: types.OPERATOR}})
+			}
+		case '>':
+			s.eat()
+			switch s.Content[s.CurrentPosition] {
+			case '=':
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.GREATER_OR_EQUAL, Value: types.Literal{Value: ">=", Type: types.OPERATOR}})
+				s.eat()
+			default:
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.GREATER, Value: types.Literal{Value: ">", Type: types.OPERATOR}})
+			}
 		case '"':
 			s.eat()
 			before := s.CurrentPosition
@@ -92,7 +123,6 @@ func Tokenize(source string) *Source {
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: variable, Type: types.STRING}})
 			break
 		case ';':
-			// s.Tokens = append(s.Tokens, Token{TokenType: SEMICOLON, Value: ';'})
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.SEMICOLON, Value: types.Literal{Value: types.SEMICOLON, Type: types.OPERATOR}})
 			s.eat()
 			break
@@ -109,10 +139,8 @@ func Tokenize(source string) *Source {
 				after := s.CurrentPosition
 				variable := s.Content[before:after]
 				if number, err := strconv.Atoi(variable); err == nil {
-					// s.Tokens = append(s.Tokens, Token{TokenType: LITERAL, Value: number, LiteralType: INTEGER})
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: number, Type: types.INTEGER}})
 				} else if number, err := strconv.ParseFloat(variable, 64); err == nil {
-					// s.Tokens = append(s.Tokens, Token{TokenType: LITERAL, Value: number, LiteralType: FLOAT64})
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: number, Type: types.FLOAT64}})
 				} else {
 					log.Fatalf("cannot parse source file\n")
