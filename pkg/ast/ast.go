@@ -6,8 +6,6 @@ import (
 	"log"
 )
 
-var current = 0
-
 type AstBuilder struct {
 	tokens              []types.Token
 	CurrentTokenPointer int
@@ -23,6 +21,13 @@ func NewAstBuilder(typess []types.Token) *AstBuilder {
 func (a *AstBuilder) getCurrentToken() types.Token {
 	if a.CurrentTokenPointer < len(a.tokens) {
 		return a.tokens[a.CurrentTokenPointer]
+	}
+	return types.Token{}
+}
+
+func (a *AstBuilder) peek(forward int) types.Token {
+	for a.CurrentTokenPointer < len(a.tokens) {
+		return a.tokens[a.CurrentTokenPointer+forward]
 	}
 	return types.Token{}
 }
@@ -47,7 +52,7 @@ func (a *AstBuilder) Expr() types.Node {
 	}
 	left := a.Term()
 	switch a.getCurrentToken().TokenType {
-	case types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.EQUALS, types.NOT_EQUAL:
+	case types.TRUE, types.FALSE, types.NOT, types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.EQUALS, types.NOT_EQUAL:
 		op := a.getCurrentToken().TokenType
 		a.eat(op)
 		right := a.Expr()
@@ -82,6 +87,12 @@ func (a *AstBuilder) Term() types.Node {
 func (a *AstBuilder) Factor() types.Node {
 	c := a.CurrentTokenPointer
 	switch a.tokens[c].TokenType {
+	case types.NOT:
+		a.eat(types.NOT)
+		if a.peek(0).Value.(types.Literal).Type != types.BOOLEAN {
+			log.Fatalf("unexpected token")
+		}
+		return types.UnaryOP{Left: types.NOT, Right: a.Expr()}
 	case types.MINUS:
 		a.eat(types.MINUS)
 		return types.UnaryOP{Left: types.MINUS, Right: a.Expr()}
@@ -99,6 +110,6 @@ func (a *AstBuilder) Factor() types.Node {
 		a.eat(types.RBRACE)
 		return expr
 	}
-	fmt.Println("received nil ", a.tokens[c].TokenType == types.GREATER)
+	fmt.Println("received nil ", a.tokens[c].TokenType)
 	return nil
 }

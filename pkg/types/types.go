@@ -22,6 +22,7 @@ const (
 	INTEGER
 	STRING
 	OPERATOR
+	BOOLEAN
 )
 
 const (
@@ -47,6 +48,9 @@ const (
 	EOF       = "EOF"
 	EXPR      = "expr"
 	DOT       = "."
+
+	TRUE  = "true"
+	FALSE = "false"
 )
 
 type Token struct {

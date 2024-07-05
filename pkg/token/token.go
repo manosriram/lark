@@ -32,11 +32,19 @@ func (s *Source) eatNum() {
 	}
 }
 
+func (s *Source) peek(forward int) rune {
+	for s.CurrentPosition < len(s.Content) {
+		return rune(s.Content[s.CurrentPosition+forward])
+	}
+	return rune(0)
+}
+
 func (s *Source) eatVar() {
 	for s.CurrentPosition < len(s.Content) && (isalpha(rune(s.Content[s.CurrentPosition]))) {
 		s.CurrentPosition += 1
 	}
 }
+
 func (s *Source) eat() {
 	done := false
 	for s.CurrentPosition < len(s.Content) && (s.Content[s.CurrentPosition] == ' ' || s.Content[s.CurrentPosition] == '\n') {
@@ -132,6 +140,23 @@ func Tokenize(source string) *Source {
 		case '\n':
 			s.eat()
 			break
+		case 't':
+			if s.peek(1) == 'r' && s.peek(2) == 'u' && s.peek(3) == 'e' {
+				s.eat()
+				s.eat()
+				s.eat()
+				s.eat()
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: true, Type: types.BOOLEAN}})
+			}
+		case 'f':
+			if s.peek(1) == 'a' && s.peek(2) == 'l' && s.peek(3) == 's' && s.peek(4) == 'e' {
+				s.eat()
+				s.eat()
+				s.eat()
+				s.eat()
+				s.eat()
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: false, Type: types.BOOLEAN}})
+			}
 		default:
 			if unicode.IsNumber(rune(s.Content[s.CurrentPosition])) {
 				before := s.CurrentPosition

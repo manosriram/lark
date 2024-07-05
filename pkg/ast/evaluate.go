@@ -20,6 +20,19 @@ type RealNumber interface {
 	int | float64
 }
 
+func performBooleanComparisionOperation(left, right bool, op types.TOKEN_TYPE) bool {
+	switch op {
+	case types.NOT:
+		return !right
+	case types.EQUALS:
+		return left == right
+	case types.NOT_EQUAL:
+		return left != right
+	default:
+		panic(fmt.Sprintf("unsupported operation: %v", op))
+	}
+}
+
 func performComparisionOperation[T Comparator](left, right T, op types.TOKEN_TYPE) bool {
 	switch op {
 	case types.GREATER:
@@ -34,6 +47,10 @@ func performComparisionOperation[T Comparator](left, right T, op types.TOKEN_TYP
 		return left == right
 	case types.NOT_EQUAL:
 		return left != right
+	case types.TRUE:
+		return true
+	case types.FALSE:
+		return false
 	default:
 		panic(fmt.Sprintf("unsupported operation: %v", op))
 	}
@@ -79,6 +96,8 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 			return performOperation(0, right.(float64), op)
 		case int:
 			return performOperation(0, right.(int), op)
+		case bool:
+			return performBooleanComparisionOperation(false, right.(bool), op)
 		}
 	case types.BinOP:
 		left := e.Visit(n.Left)
@@ -112,6 +131,8 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 					return performComparisionOperation(left, right, n.Op)
 				}
 			}
+		case bool:
+			return performBooleanComparisionOperation(left, right.(bool), n.Op)
 		}
 
 	case types.Assign:
@@ -123,7 +144,7 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 	case types.Literal:
 		nodeValue := n.Value.(types.Literal).Value
 		switch v := nodeValue.(type) {
-		case int, float64, string:
+		case int, float64, string, bool:
 			return v
 		default:
 			log.Fatalf("unsupported type %s\n", v)
