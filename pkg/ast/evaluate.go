@@ -140,7 +140,12 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		e.SymbolTable[n.Id.(types.Id).Name] = right
 		return right
 	case types.Id:
-		return n.Value
+		// fmt.Println("got ", n)
+		value, ok := e.SymbolTable[n.Name]
+		if !ok {
+			log.Fatalf("variable '%s' not defined", n)
+		}
+		return value
 	case types.Literal:
 		nodeValue := n.Value.(types.Literal).Value
 		switch v := nodeValue.(type) {
