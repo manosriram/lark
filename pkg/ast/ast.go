@@ -69,7 +69,29 @@ func (a *AstBuilder) Expr() types.Node {
 		right := a.Expr()
 		a.eat(types.SEMICOLON)
 		return types.Assign{Id: left, Value: right}
+	case types.IF:
+		a.eat(types.IF)
+		condition := a.Expr()
+		ifStatement := types.IfElseStatement{Condition: condition}
+
+		a.eat(types.LPAREN)
+		for a.getCurrentToken().TokenType != types.RPAREN {
+			node := a.Expr()
+			ifStatement.IfChildren = append(ifStatement.IfChildren, node)
+		}
+		a.eat(types.RPAREN)
+		if a.getCurrentToken().TokenType == types.ELSE {
+			a.eat(types.ELSE)
+			a.eat(types.LPAREN)
+			for a.getCurrentToken().TokenType != types.RPAREN {
+				node := a.Expr()
+				ifStatement.ElseChildren = append(ifStatement.ElseChildren, node)
+			}
+			a.eat(types.RPAREN)
+		}
+		return ifStatement
 	}
+
 	return left
 }
 
@@ -112,6 +134,11 @@ func (a *AstBuilder) Factor() types.Node {
 		expr := a.Expr()
 		a.eat(types.RBRACE)
 		return expr
+		// case types.LPAREN:
+		// a.eat(types.LPAREN)
+		// expr := a.Expr()
+		// a.eat(types.RPAREN)
+		// return expr
 	}
 	fmt.Println("received nil ", a.tokens[c].TokenType)
 	return nil

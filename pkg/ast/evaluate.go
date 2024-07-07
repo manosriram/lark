@@ -135,12 +135,22 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 			return performBooleanComparisionOperation(left, right.(bool), n.Op)
 		}
 
+	case types.IfElseStatement:
+		condition := e.Visit(n.Condition)
+		if condition.(bool) {
+			for _, statement := range n.IfChildren {
+				e.Visit(statement)
+			}
+		} else {
+			for _, statement := range n.ElseChildren {
+				e.Visit(statement)
+			}
+		}
 	case types.Assign:
 		right := e.Visit(n.Value)
 		e.SymbolTable[n.Id.(types.Id).Name] = right
 		return right
 	case types.Id:
-		// fmt.Println("got ", n)
 		value, ok := e.SymbolTable[n.Name]
 		if !ok {
 			log.Fatalf("variable '%s' not defined", n)

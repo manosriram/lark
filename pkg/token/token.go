@@ -155,6 +155,12 @@ func Tokenize(source string) *Source {
 		case ')':
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.RBRACE, Value: types.Literal{Value: ')', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			s.eat()
+		case '{':
+			s.Tokens = append(s.Tokens, types.Token{TokenType: types.LPAREN, Value: types.Literal{Value: '{', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+			s.eat()
+		case '}':
+			s.Tokens = append(s.Tokens, types.Token{TokenType: types.RPAREN, Value: types.Literal{Value: '}', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+			s.eat()
 		case '!':
 			s.eat()
 			switch s.getCurrentToken() {
@@ -182,6 +188,12 @@ func Tokenize(source string) *Source {
 			default:
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.GREATER, Value: types.Literal{Value: ">", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			}
+		case 'i':
+			if s.peek(1) == 'f' {
+				s.eatN(2)
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.IF, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+			}
+			break
 		case '"':
 			s.eat()
 			variable := s.openUntil(byte('"'))
@@ -208,6 +220,11 @@ func Tokenize(source string) *Source {
 			if s.expect("false") {
 				s.eatN(5)
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: false, Type: types.BOOLEAN}, LineNumber: s.CurrentLineNumber})
+			}
+		case 'e':
+			if s.expect("else") {
+				s.eatN(4)
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.ELSE, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 			}
 		default:
 			if unicode.IsNumber(rune(s.getCurrentToken())) {

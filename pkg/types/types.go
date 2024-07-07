@@ -10,6 +10,7 @@ type LITERAL_TYPE int
 const (
 	EXPRESSION_STATEMENT STATEMENT_TYPE = iota
 	ASSIGN_STATEMENT
+	IF_STATEMENT
 )
 
 const (
@@ -23,6 +24,7 @@ const (
 	STRING
 	OPERATOR
 	BOOLEAN
+	STATEMENT
 )
 
 const (
@@ -32,6 +34,8 @@ const (
 	DIVIDE              = "/"
 	LBRACE              = "("
 	RBRACE              = ")"
+	LPAREN              = "{"
+	RPAREN              = "}"
 	ASSIGN              = "="
 
 	GREATER          = ">"
@@ -41,6 +45,9 @@ const (
 	NOT              = "!"
 	NOT_EQUAL        = "!="
 	EQUALS           = "=="
+
+	IF   = "if"
+	ELSE = "else"
 
 	SEMICOLON = ";"
 	ID        = "id"
@@ -112,6 +119,20 @@ func (s Statement) NodeType() string {
 
 func (e Expression) NodeType() string {
 	return "expression"
+}
+
+type IfElseStatement struct {
+	Condition    Node
+	IfChildren   []Node
+	ElseChildren []Node
+}
+
+func (i IfElseStatement) NodeType() string {
+	return "ifstatement"
+}
+
+func (i IfElseStatement) String() string {
+	return "if"
 }
 
 type UnaryOP struct {
