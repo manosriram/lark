@@ -34,10 +34,10 @@ func main() {
 	}
 
 	for _, node := range root.Children {
-		fmt.Println(evaluator.Evaluate(node))
+		evaluator.Evaluate(node)
 	}
 
-	// for k, v := range evaluator.SymbolTable {
-	// fmt.Printf("var_name: %s, var_value: %v\n", k, v)
-	// }
+	for k, v := range evaluator.SymbolTable {
+		fmt.Printf("var_name: %s, var_value: %v\n", k, v)
+	}
 }

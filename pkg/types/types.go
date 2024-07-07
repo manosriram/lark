@@ -58,6 +58,7 @@ type Token struct {
 	TokenType   TOKEN_TYPE
 	Value       Node
 	LiteralType LITERAL_TYPE
+	LineNumber  int
 }
 
 type StatementType int
