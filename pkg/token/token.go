@@ -44,8 +44,18 @@ func (s *Source) eatNum() string {
 	}
 	return result
 }
+func (s *Source) closedUntil(untilLiteral byte) string {
+	// var result string = string(s.getCurrentToken())
+	var result string
+	for s.CurrentPosition < len(s.Content) && s.getCurrentToken() != untilLiteral {
+		result += string(s.getCurrentToken())
+		s.eatN(1)
+	}
+	s.eatN(1)
+	return result
+}
 
-func (s *Source) until(untilLiteral byte) string {
+func (s *Source) openUntil(untilLiteral byte) string {
 	// var result string = string(s.getCurrentToken())
 	var result string
 	for s.CurrentPosition < len(s.Content) && s.getCurrentToken() != untilLiteral {
@@ -118,8 +128,18 @@ func Tokenize(source string) *Source {
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.MULTIPLY, Value: types.Literal{Value: '*', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			s.eat()
 		case '/':
-			s.Tokens = append(s.Tokens, types.Token{TokenType: types.DIVIDE, Value: types.Literal{Value: '/', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
-			s.eat()
+			if s.peek(1) == '/' {
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.COMMENT, Value: types.Literal{Value: "//", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.openUntil('\n')
+			} else if s.peek(1) == '*' {
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.COMMENT, Value: types.Literal{Value: "//", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+
+				s.closedUntil('*')
+				s.closedUntil('/')
+			} else {
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.DIVIDE, Value: types.Literal{Value: '/', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.eat()
+			}
 		case '=':
 			s.eat()
 			switch s.getCurrentToken() {
@@ -164,7 +184,7 @@ func Tokenize(source string) *Source {
 			}
 		case '"':
 			s.eat()
-			variable := s.until(byte('"'))
+			variable := s.openUntil(byte('"'))
 			s.eat()
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: variable, Type: types.STRING}, LineNumber: s.CurrentLineNumber})
 			break

@@ -37,7 +37,7 @@ func (a *AstBuilder) eat(t types.TOKEN_TYPE) bool {
 		a.CurrentTokenPointer++
 		return true
 	} else {
-		log.Fatalf("syntax error at line %d\n", a.getCurrentToken().LineNumber)
+		log.Fatalf("syntax error: expected %s\n", t)
 	}
 	return false
 }
@@ -67,7 +67,6 @@ func (a *AstBuilder) Expr() types.Node {
 	case types.ASSIGN:
 		a.eat(types.ASSIGN)
 		right := a.Expr()
-		fmt.Println("r = ", right)
 		a.eat(types.SEMICOLON)
 		return types.Assign{Id: left, Value: right}
 	}
@@ -90,10 +89,12 @@ func (a *AstBuilder) Factor() types.Node {
 	switch a.tokens[c].TokenType {
 	case types.NOT:
 		a.eat(types.NOT)
-		if a.getCurrentToken().Value.(types.Literal).Type != types.BOOLEAN {
-			log.Fatalf("unexpected token\n")
+		if a.peek(0).Value.(types.Literal).Type != types.BOOLEAN {
+			log.Fatalf("unexpected token")
 		}
 		return types.UnaryOP{Left: types.NOT, Right: a.Expr()}
+	case types.COMMENT:
+		a.eat(types.COMMENT)
 	case types.MINUS:
 		a.eat(types.MINUS)
 		right := a.Expr()
@@ -103,9 +104,6 @@ func (a *AstBuilder) Factor() types.Node {
 		return types.Literal{Value: a.tokens[c].Value, Type: a.tokens[c].LiteralType}
 	case types.ID:
 		a.eat(types.ID)
-		if a.getCurrentToken().TokenType != types.ASSIGN {
-			log.Fatalf("syntax error at line %d: expected assignment statement\n", a.getCurrentToken().LineNumber)
-		}
 		return types.Id{Name: a.tokens[c].Value.(types.Literal).Value.(string)}
 	case types.SEMICOLON:
 		a.eat(types.SEMICOLON)

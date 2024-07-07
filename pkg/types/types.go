@@ -48,6 +48,7 @@ const (
 	EOF       = "EOF"
 	EXPR      = "expr"
 	DOT       = "."
+	COMMENT   = "//"
 
 	TRUE  = "true"
 	FALSE = "false"
