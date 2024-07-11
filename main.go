@@ -12,7 +12,11 @@ import (
 var symbolTable map[string]interface{}
 
 func main() {
-	content, err := os.ReadFile("source.lark")
+	if len(os.Args) < 2 {
+		log.Fatalf("not enough arguments\n")
+	}
+	file := os.Args[1]
+	content, err := os.ReadFile(file)
 	if err != nil {
 		log.Fatal("error reading source file")
 	}

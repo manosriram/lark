@@ -71,7 +71,10 @@ func (s *Source) expect(expectedLiteral string) bool {
 	if len(s.Content)-current < len(expectedLiteral) {
 		return false
 	}
-	for current < len(s.Tokens) && s.getCurrentToken() == expectedLiteral[i] {
+	for current < len(s.Content) && i < len(expectedLiteral) {
+		if s.Content[current] != expectedLiteral[i] {
+			return false
+		}
 		i++
 		current++
 	}
@@ -122,7 +125,13 @@ func Tokenize(source string) *Source {
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.PLUS, Value: types.Literal{Value: '+', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			s.eat()
 		case '-':
-			s.Tokens = append(s.Tokens, types.Token{TokenType: types.MINUS, Value: types.Literal{Value: '-', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+			if s.peek(1) == '>' {
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.ASSIGN, Value: types.Literal{Value: '=', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.eat()
+			} else {
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.MINUS, Value: types.Literal{Value: '-', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.eat()
+			}
 			s.eat()
 		case '*':
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.MULTIPLY, Value: types.Literal{Value: '*', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
@@ -146,8 +155,6 @@ func Tokenize(source string) *Source {
 			case '=':
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.EQUALS, Value: types.Literal{Value: "==", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 				s.eat()
-			default:
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.ASSIGN, Value: types.Literal{Value: '=', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			}
 		case '(':
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.LBRACE, Value: types.Literal{Value: '(', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
@@ -188,12 +195,6 @@ func Tokenize(source string) *Source {
 			default:
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.GREATER, Value: types.Literal{Value: ">", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			}
-		case 'i':
-			if s.peek(1) == 'f' {
-				s.eatN(2)
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.IF, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
-			}
-			break
 		case '"':
 			s.eat()
 			variable := s.openUntil(byte('"'))
@@ -211,21 +212,6 @@ func Tokenize(source string) *Source {
 			s.CurrentLineNumber++
 			s.eat()
 			break
-		case 't':
-			if s.expect("true") {
-				s.eatN(4)
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: true, Type: types.BOOLEAN}, LineNumber: s.CurrentLineNumber})
-			}
-		case 'f':
-			if s.expect("false") {
-				s.eatN(5)
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: false, Type: types.BOOLEAN}, LineNumber: s.CurrentLineNumber})
-			}
-		case 'e':
-			if s.expect("else") {
-				s.eatN(4)
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.ELSE, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
-			}
 		default:
 			if unicode.IsNumber(rune(s.getCurrentToken())) {
 				variable := s.eatNum()
@@ -238,7 +224,18 @@ func Tokenize(source string) *Source {
 				}
 			} else if unicode.IsLetter(rune(s.getCurrentToken())) {
 				variable := s.eatVar()
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: variable, Type: types.STRING}, LineNumber: s.CurrentLineNumber})
+				switch variable {
+				case "true":
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: true, Type: types.BOOLEAN}, LineNumber: s.CurrentLineNumber})
+				case "false":
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: false, Type: types.BOOLEAN}, LineNumber: s.CurrentLineNumber})
+				case "else":
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.ELSE, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+				case "if":
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.IF, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+				default:
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: variable, Type: types.STRING}, LineNumber: s.CurrentLineNumber})
+				}
 			} else {
 				log.Fatalf("unsupported type %v at line %d\n", string(s.getCurrentToken()), s.CurrentLineNumber)
 			}

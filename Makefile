@@ -1,9 +1,6 @@
 run:
-	go run main.go
+	go build -o lark && ./lark source.lark
 build:
 	go build -o lark
 test:
 	go test
-buildrun:
-	go build -o lark;
-	./lark
