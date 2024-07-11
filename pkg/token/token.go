@@ -125,13 +125,7 @@ func Tokenize(source string) *Source {
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.PLUS, Value: types.Literal{Value: '+', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			s.eat()
 		case '-':
-			if s.peek(1) == '>' {
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.ASSIGN, Value: types.Literal{Value: '=', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
-				s.eat()
-			} else {
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.MINUS, Value: types.Literal{Value: '-', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
-				s.eat()
-			}
+			s.Tokens = append(s.Tokens, types.Token{TokenType: types.MINUS, Value: types.Literal{Value: '-', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			s.eat()
 		case '*':
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.MULTIPLY, Value: types.Literal{Value: '*', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
@@ -182,6 +176,9 @@ func Tokenize(source string) *Source {
 			switch s.getCurrentToken() {
 			case '=':
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LESSER_OR_EQUAL, Value: types.Literal{Value: "<=", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.eat()
+			case '-':
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.ASSIGN, Value: types.Literal{Value: '=', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 				s.eat()
 			default:
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LESSER, Value: types.Literal{Value: "<", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
