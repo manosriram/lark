@@ -51,14 +51,16 @@ func (a *AstBuilder) Expr() types.Node {
 		return nil
 	}
 	left := a.Term()
+	// z := a.getCurrentToken().TokenType
 	switch a.getCurrentToken().TokenType {
-	case types.TRUE, types.FALSE, types.NOT, types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.EQUALS, types.NOT_EQUAL:
+	case types.TRUE, types.FALSE, types.NOT:
 		op := a.getCurrentToken().TokenType
 		a.eat(op)
 		right := a.Expr()
 		left = types.BinOP{Left: left, Right: right, Op: op}
-	case types.PLUS, types.MINUS:
-		for a.getCurrentToken().TokenType == types.PLUS || a.getCurrentToken().TokenType == types.MINUS {
+
+	case types.PLUS, types.MINUS, types.EQUALS, types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.NOT_EQUAL:
+		for a.getCurrentToken().TokenType == types.PLUS || a.getCurrentToken().TokenType == types.MINUS || a.getCurrentToken().TokenType == types.EQUALS || a.getCurrentToken().TokenType == types.GREATER || a.getCurrentToken().TokenType == types.GREATER_OR_EQUAL || a.getCurrentToken().TokenType == types.LESSER || a.getCurrentToken().TokenType == types.LESSER_OR_EQUAL || a.getCurrentToken().TokenType == types.NOT_EQUAL {
 			op := a.getCurrentToken().TokenType
 			a.eat(op)
 			right := a.Term()
@@ -134,11 +136,10 @@ func (a *AstBuilder) Factor() types.Node {
 		expr := a.Expr()
 		a.eat(types.RBRACE)
 		return expr
-		// case types.LPAREN:
-		// a.eat(types.LPAREN)
-		// expr := a.Expr()
-		// a.eat(types.RPAREN)
-		// return expr
+	case types.EQUALS, types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.NOT_EQUAL:
+		a.eat(a.getCurrentToken().TokenType)
+		right := a.Expr()
+		return right
 	}
 	fmt.Println("received nil ", a.tokens[c].TokenType)
 	return nil
