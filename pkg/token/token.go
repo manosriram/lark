@@ -204,7 +204,7 @@ func Tokenize(source string) *Source {
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.SEMICOLON, Value: types.Literal{Value: types.SEMICOLON, Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			s.eat()
 			break
-		case ' ':
+		case ' ', '\t':
 			s.eat()
 			break
 		case '\n':
