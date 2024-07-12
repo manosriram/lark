@@ -71,6 +71,11 @@ func (a *AstBuilder) Expr() types.Node {
 		right := a.Expr()
 		a.eat(types.SEMICOLON)
 		return types.Assign{Id: left, Value: right}
+	case types.SWAP:
+		a.eat(types.SWAP)
+		right := a.Expr()
+		a.eat(types.SEMICOLON)
+		return types.Swap{Left: left, Right: right}
 	case types.IF:
 		a.eat(types.IF)
 		condition := a.Expr()

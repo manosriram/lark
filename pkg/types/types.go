@@ -56,6 +56,7 @@ const (
 	EXPR      = "expr"
 	DOT       = "."
 	COMMENT   = "//"
+	SWAP      = "<->"
 
 	TRUE  = "true"
 	FALSE = "false"
@@ -173,6 +174,19 @@ func (a Assign) String() string {
 
 func (a Assign) NodeType() string {
 	return "assign"
+}
+
+type Swap struct {
+	Left  Node
+	Right Node
+}
+
+func (s Swap) String() string {
+	return s.Left.String()
+}
+
+func (s Swap) NodeType() string {
+	return "swap"
 }
 
 type Literal struct {

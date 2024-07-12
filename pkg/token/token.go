@@ -178,7 +178,11 @@ func Tokenize(source string) *Source {
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LESSER_OR_EQUAL, Value: types.Literal{Value: "<=", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 				s.eat()
 			case '-':
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.ASSIGN, Value: types.Literal{Value: '=', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				if s.peek(1) == '>' {
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.SWAP, Value: types.Literal{Value: "<->", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				} else {
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.ASSIGN, Value: types.Literal{Value: '=', Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				}
 				s.eat()
 			default:
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LESSER, Value: types.Literal{Value: "<", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})

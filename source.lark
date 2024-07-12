@@ -8,3 +8,5 @@ if (a==b) {
 		c = "not_ok";
 }
 tt <- !false;
+c <-> e;
+a <-> c;

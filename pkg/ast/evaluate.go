@@ -150,6 +150,8 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		right := e.Visit(n.Value)
 		e.SymbolTable[n.Id.(types.Id).Name] = right
 		return right
+	case types.Swap:
+		e.SymbolTable[n.Left.String()], e.SymbolTable[n.Right.String()] = e.SymbolTable[n.Right.String()], e.SymbolTable[n.Left.String()]
 	case types.Id:
 		value, ok := e.SymbolTable[n.Name]
 		if !ok {
