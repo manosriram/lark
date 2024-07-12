@@ -41,6 +41,14 @@ if (a==b) {
 }
 ```
 
+> swap variables
+
+```
+a <- 1;
+b <- -123;
+a <-> b;
+/* a = -123, b = 1 */
+```
 
 ### Usage
 ##### Using Makefile
