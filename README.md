@@ -18,7 +18,7 @@ c <- 3.14;
 d <- true;
 e <- 123;
 f <- (1+2+3) + c + (3*1/10);
-unary -> !false;
+unary <- !false;
 ```
 
 > operators
