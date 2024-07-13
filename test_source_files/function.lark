@@ -4,4 +4,16 @@ fn addstatic[] <<
 		return fna+fnb;
 >>
 
+fn add[a,b,c] <<
+		return a+b+c;
+>>
+
+c <- 100;
+fn addlocalvar[a, b] <<
+		local c <- 6;
+		return a+b+c;
+>>
+
 fnval <- addstatic();
+sum <- add(1,2,3);
+localsum <- addlocalvar(1, 2);

@@ -259,8 +259,8 @@ func Tokenize(source string) *Source {
 						s.eat()
 						s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 
-						z := s.openUntil(']')
-						args := strings.Split(z, ",")
+						rawArgs := s.openUntil(']')
+						args := strings.Split(rawArgs, types.FUNCTION_ARGUMENT_SEPARATOR)
 						for _, arg := range args {
 							s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.EXPRESSION}, LineNumber: s.CurrentLineNumber})
 						}
@@ -270,17 +270,16 @@ func Tokenize(source string) *Source {
 						s.eat()
 						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 
-						z := s.openUntil(')')
-						args := strings.Split(z, ",")
+						rawArgs := s.openUntil(')')
+						args := strings.Split(rawArgs, types.FUNCTION_ARGUMENT_SEPARATOR)
 						for _, arg := range args {
-							if number, err := strconv.Atoi(arg); err == nil {
+							if number, err := strconv.Atoi(strings.TrimSpace(arg)); err == nil {
 								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.INTEGER}, LineNumber: s.CurrentLineNumber})
-							} else if number, err := strconv.ParseFloat(variable, 64); err == nil {
+							} else if number, err := strconv.ParseFloat(arg, 64); err == nil {
 								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.FLOAT64}, LineNumber: s.CurrentLineNumber})
 							} else {
 								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: variable, Type: types.STRING}, LineNumber: s.CurrentLineNumber})
 							}
-							// s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: arg, Type: types.EXPRESSION}, LineNumber: s.CurrentLineNumber})
 						}
 						s.eat()
 						break
