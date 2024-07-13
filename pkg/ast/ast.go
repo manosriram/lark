@@ -1,7 +1,6 @@
 package ast
 
 import (
-	"fmt"
 	types "lark/pkg/types"
 	"log"
 )
@@ -146,6 +145,5 @@ func (a *AstBuilder) Factor() types.Node {
 		right := a.Expr()
 		return right
 	}
-	fmt.Println("received nil ", a.tokens[c].TokenType)
 	return nil
 }

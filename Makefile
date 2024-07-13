@@ -3,4 +3,4 @@ run:
 build:
 	go build -o lark
 test:
-	go test
+	go test -v

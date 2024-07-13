@@ -151,6 +151,14 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		e.SymbolTable[n.Id.(types.Id).Name] = right
 		return right
 	case types.Swap:
+		_, ok := e.SymbolTable[n.Left.String()]
+		if !ok {
+			log.Fatalf("variable '%s' not defined", n.Left.String())
+		}
+		_, ok = e.SymbolTable[n.Right.String()]
+		if !ok {
+			log.Fatalf("variable '%s' not defined", n.Right.String())
+		}
 		e.SymbolTable[n.Left.String()], e.SymbolTable[n.Right.String()] = e.SymbolTable[n.Right.String()], e.SymbolTable[n.Left.String()]
 	case types.Id:
 		value, ok := e.SymbolTable[n.Name]

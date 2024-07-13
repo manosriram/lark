@@ -36,7 +36,7 @@ const (
 	RBRACE              = ")"
 	LPAREN              = "{"
 	RPAREN              = "}"
-	ASSIGN              = "="
+	ASSIGN              = "<-"
 
 	GREATER          = ">"
 	GREATER_OR_EQUAL = ">="
