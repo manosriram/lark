@@ -171,9 +171,18 @@ func Tokenize(source string) *Source {
 			default:
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.NOT, Value: types.Literal{Value: "!", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			}
+		case '[':
+			s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT_OPEN, Value: types.Literal{Value: "[", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+			s.eat()
+		case ']':
+			s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT_CLOSE, Value: types.Literal{Value: "]", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+			s.eat()
 		case '<':
 			s.eat()
 			switch s.getCurrentToken() {
+			case '<':
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_OPEN, Value: types.Literal{Value: "<<", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.eat()
 			case '=':
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LESSER_OR_EQUAL, Value: types.Literal{Value: "<=", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 				s.eat()
@@ -190,6 +199,9 @@ func Tokenize(source string) *Source {
 		case '>':
 			s.eat()
 			switch s.getCurrentToken() {
+			case '>':
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CLOSE, Value: types.Literal{Value: ">>", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.eat()
 			case '=':
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.GREATER_OR_EQUAL, Value: types.Literal{Value: ">=", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 				s.eat()
@@ -234,13 +246,30 @@ func Tokenize(source string) *Source {
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.ELSE, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 				case "if":
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.IF, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+				case "fn":
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION, Value: types.Literal{Value: "fn", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+				case "ret":
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_RETURN, Value: types.Literal{Value: "return", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 				default:
-					s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: variable, Type: types.STRING}, LineNumber: s.CurrentLineNumber})
+					switch s.getCurrentToken() {
+					case '(':
+						s.eat()
+						if s.getCurrentToken() == ')' {
+							s.eat()
+							s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+							// s.eat()
+						} else {
+							log.Fatalf("expected ')'")
+						}
+						break
+					default:
+						s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: variable, Type: types.STRING}, LineNumber: s.CurrentLineNumber})
+						break
+					}
 				}
 			} else {
 				log.Fatalf("unsupported type %v at line %d\n", string(s.getCurrentToken()), s.CurrentLineNumber)
 			}
-
 		}
 	}
 

@@ -10,6 +10,32 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func evaluate(t *testing.T, sourceFile string) map[string]interface{} {
+	content, err := os.ReadFile(sourceFile)
+	assert.Equal(t, nil, err)
+
+	root := types.Compound{Children: []types.Node{}}
+	symbolTable = make(map[string]interface{})
+	tokens := token.Tokenize(string(content))
+	builder := ast.NewAstBuilder(tokens.Tokens)
+	var tree types.Node
+	for builder.CurrentTokenPointer < len(tokens.Tokens)-1 {
+		tree = builder.Parse()
+		if tree != nil {
+			root.Children = append(root.Children, tree)
+		}
+	}
+	evaluator := ast.Evaluator{
+		SymbolTable: symbolTable,
+	}
+
+	for _, node := range root.Children {
+		evaluator.Evaluate(node)
+	}
+
+	return symbolTable
+}
+
 func Test_Tokenize(t *testing.T) {
 	content, err := os.ReadFile("test_source_files/token.lark")
 	assert.Equal(t, nil, err)
@@ -91,9 +117,7 @@ func areValuesEqual(v1, v2 interface{}) bool {
 	}
 }
 func Test_Parser(t *testing.T) {
-	content, err := os.ReadFile("test_source_files/parse.lark")
-	assert.Equal(t, nil, err)
-
+	symbolTable := evaluate(t, "test_source_files/parse.lark")
 	expectedSymbolTableVars := map[string]interface{}{
 		"a":  false,
 		"b":  true,
@@ -103,27 +127,16 @@ func Test_Parser(t *testing.T) {
 		"d":  "not_ok",
 	}
 
-	root := types.Compound{Children: []types.Node{}}
-	symbolTable = make(map[string]interface{})
-	tokens := token.Tokenize(string(content))
-	builder := ast.NewAstBuilder(tokens.Tokens)
-	var tree types.Node
-	for builder.CurrentTokenPointer < len(tokens.Tokens)-1 {
-		tree = builder.Parse()
-		if tree != nil {
-			root.Children = append(root.Children, tree)
-		}
-	}
-	evaluator := ast.Evaluator{
-		SymbolTable: symbolTable,
-	}
-
-	for _, node := range root.Children {
-		evaluator.Evaluate(node)
-	}
-
 	assert.Equal(t, len(expectedSymbolTableVars), len(symbolTable))
 	for key := range expectedSymbolTableVars {
 		assert.Equal(t, expectedSymbolTableVars[key], symbolTable[key])
 	}
+}
+
+func Test_Function(t *testing.T) {
+	symbolTable := evaluate(t, "test_source_files/function.lark")
+	assert.Equal(t, len(symbolTable), 4)
+	assert.Equal(t, 1000, symbolTable["fna"])
+	assert.Equal(t, 500, symbolTable["fnb"])
+	assert.Equal(t, 1500, symbolTable["fnval"])
 }

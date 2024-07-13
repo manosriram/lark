@@ -60,6 +60,17 @@ const (
 
 	TRUE  = "true"
 	FALSE = "false"
+
+	FUNCTION                    = "fn"
+	FUNCTION_ARGUMENT_OPEN      = "["
+	FUNCTION_ARGUMENT_CLOSE     = "]"
+	FUNCTION_RETURN             = "return"
+	FUNCTION_ARGUMENT_SEPARATOR = ","
+	FUNCTION_OPEN               = "<<"
+	FUNCTION_CLOSE              = ">>"
+	FUNCTION_CALL_OPEN          = "("
+	FUNCTION_CALL_CLOSE         = ")"
+	FUNCTION_CALL               = "()"
 )
 
 type Token struct {
@@ -120,6 +131,34 @@ func (s Statement) NodeType() string {
 
 func (e Expression) NodeType() string {
 	return "expression"
+}
+
+type FunctionCall struct {
+	Name      string
+	Arguments []Id
+}
+
+func (f FunctionCall) NodeType() string {
+	return "functioncall"
+}
+
+func (f FunctionCall) String() string {
+	return "fncall"
+}
+
+type Function struct {
+	Name             string
+	Arguments        []Id
+	Children         []Node
+	ReturnExpression Node
+}
+
+func (f Function) NodeType() string {
+	return "function"
+}
+
+func (f Function) String() string {
+	return "fn"
 }
 
 type IfElseStatement struct {

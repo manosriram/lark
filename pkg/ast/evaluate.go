@@ -150,6 +150,13 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		right := e.Visit(n.Value)
 		e.SymbolTable[n.Id.(types.Id).Name] = right
 		return right
+	case types.Function:
+		e.SymbolTable[n.Name] = n
+	case types.FunctionCall:
+		for _, v := range e.SymbolTable[n.Name].(types.Function).Children {
+			e.Visit(v)
+		}
+		return e.Visit(e.SymbolTable[n.Name].(types.Function).ReturnExpression)
 	case types.Swap:
 		_, ok := e.SymbolTable[n.Left.String()]
 		if !ok {

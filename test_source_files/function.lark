@@ -1,0 +1,7 @@
+fn addstatic[] <<
+		fna <- 1000;
+		fnb <- 500;
+		ret fna+fnb;
+>>
+
+fnval <- addstatic();

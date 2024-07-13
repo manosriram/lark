@@ -10,3 +10,11 @@ if (a==b) {
 tt <- !false;
 c <-> e;
 a <-> c;
+
+fn hi[] <<
+		a <- 1000;
+		bbb <- 123;
+		ret a+bbb;
+>>
+
+fnval <- hi();

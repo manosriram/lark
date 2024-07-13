@@ -68,8 +68,40 @@ func (a *AstBuilder) Expr() types.Node {
 	case types.ASSIGN:
 		a.eat(types.ASSIGN)
 		right := a.Expr()
-		a.eat(types.SEMICOLON)
+		switch right.(type) {
+		case types.FunctionCall:
+			break
+		default:
+			a.eat(types.SEMICOLON)
+		}
 		return types.Assign{Id: left, Value: right}
+	case types.FUNCTION_CALL:
+		fn := types.FunctionCall{Name: a.getCurrentToken().Value.(types.Literal).Value.(string)}
+		a.eat(types.FUNCTION_CALL)
+		a.eat(types.SEMICOLON)
+		return fn
+	case types.FUNCTION:
+		a.eat(types.FUNCTION)
+		functionName := a.getCurrentToken().Value.(types.Literal).Value
+		a.eat(types.ID)
+		function := types.Function{
+			Name: functionName.(string),
+		}
+		a.eat(types.FUNCTION_ARGUMENT_OPEN)
+		a.eat(types.FUNCTION_ARGUMENT_CLOSE)
+		a.eat(types.FUNCTION_OPEN)
+		for a.getCurrentToken().TokenType != types.FUNCTION_RETURN && a.getCurrentToken().TokenType != types.FUNCTION_CLOSE {
+			node := a.Expr()
+			function.Children = append(function.Children, node)
+		}
+		if a.getCurrentToken().TokenType == types.FUNCTION_RETURN {
+			a.eat(types.FUNCTION_RETURN)
+			function.ReturnExpression = a.Expr()
+			a.eat(types.SEMICOLON)
+		}
+		a.eat(types.FUNCTION_CLOSE)
+		return function
+
 	case types.SWAP:
 		a.eat(types.SWAP)
 		right := a.Expr()
