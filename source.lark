@@ -5,7 +5,7 @@ e <- (1+2+3) + c + (3*1/10);
 if (a==b) {
 		c <- "ok";
 } else {
-		c G- "not_ok";
+		c <- "not_ok";
 }
 tt <- !false;
 c <-> e;
