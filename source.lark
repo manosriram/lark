@@ -11,10 +11,8 @@ tt <- !false;
 c <-> e;
 a <-> c;
 
-fn hi[] <<
-		a <- 1000;
-		bbb <- 123;
-		ret a+bbb;
+fn add[] <<
+		return 1000+500;
 >>
 
-fnval <- hi();
+fnval <- add();

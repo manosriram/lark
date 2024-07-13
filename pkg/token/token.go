@@ -248,7 +248,7 @@ func Tokenize(source string) *Source {
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.IF, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 				case "fn":
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION, Value: types.Literal{Value: "fn", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
-				case "ret":
+				case "return":
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_RETURN, Value: types.Literal{Value: "return", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 				default:
 					switch s.getCurrentToken() {

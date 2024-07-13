@@ -153,6 +153,10 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 	case types.Function:
 		e.SymbolTable[n.Name] = n
 	case types.FunctionCall:
+		_, ok := e.SymbolTable[n.Name]
+		if !ok {
+			log.Fatalf("variable '%s' not defined", n.Name)
+		}
 		for _, v := range e.SymbolTable[n.Name].(types.Function).Children {
 			e.Visit(v)
 		}
