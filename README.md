@@ -50,6 +50,22 @@ a <-> b;
 /* a = -123, b = 1 */
 ```
 
+> functions
+
+```
+fn addstatic[] <<
+  return 100+500;
+>>
+
+fn addwithnoreturn[] <<
+  a <- 100;
+>>
+
+a <- 500;
+staticsum <- addstatic();
+addwithnoreturn(); // a = 100
+```
+
 ### Usage
 ##### Using Makefile
 `make run`
