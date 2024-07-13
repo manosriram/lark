@@ -33,6 +33,7 @@ const (
 	STATEMENT
 	EXPRESSION
 	KEYWORD
+	IDENT
 )
 
 const (

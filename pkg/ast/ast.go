@@ -85,9 +85,9 @@ func (a *AstBuilder) Expr() types.Node {
 	case types.FUNCTION_CALL:
 		fn := types.FunctionCall{Name: a.getCurrentToken().Value.(types.Literal).Value.(string)}
 		a.eat(types.FUNCTION_CALL)
-		for a.getCurrentToken().TokenType == types.FUNCTION_ARGUMENT {
+		for a.getCurrentToken().TokenType == types.FUNCTION_ARGUMENT || a.getCurrentToken().TokenType == types.ID {
 			fn.Arguments = append(fn.Arguments, a.getCurrentToken().Value)
-			a.eat(types.FUNCTION_ARGUMENT)
+			a.eat(a.getCurrentToken().TokenType)
 		}
 		a.eat(types.SEMICOLON)
 		return fn
@@ -181,7 +181,6 @@ func (a *AstBuilder) Factor() types.Node {
 		a.eat(types.ID)
 		return types.Id{Name: a.tokens[c].Value.(types.Literal).Value.(string)}
 	case types.LOCAL:
-		// a.eat(types.LOCAL)
 		return types.Literal{Value: "local", Type: types.KEYWORD}
 	case types.SEMICOLON:
 		a.eat(types.SEMICOLON)

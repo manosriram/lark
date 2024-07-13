@@ -53,17 +53,27 @@ a <-> b;
 > functions
 
 ```
-fn addstatic[] <<
+fn addStaticVars[] <<
   return 100+500;
 >>
 
-fn addwithnoreturn[] <<
+fn addWithNoReturn[] <<
   a <- 100;
 >>
 
-a <- 500;
-staticsum <- addstatic();
-addwithnoreturn(); // a = 100
+fn addWithArgs[a,b] <<
+  return a+b;
+>>
+
+fn addWithArgsAndLocalVar[a,b] <<
+  local c <- 3;
+  return a+b+c;
+>>
+
+addWithNoReturn();
+staticsum <- addStaticVars();
+sumOne <- addWithArgs(1, 2); // 3
+sumTwo <- addWithArgsAndLocalVar(1, 2); // 6
 ```
 
 ### Usage

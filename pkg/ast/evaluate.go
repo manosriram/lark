@@ -83,8 +83,8 @@ func (e *Evaluator) Evaluate(s types.Node) interface{} {
 
 func (e *Evaluator) Visit(node types.Node) interface{} {
 	switch n := node.(type) {
-	case types.Statement:
-		return e.Visit(node.(types.Statement).Node)
+	// case types.Statement:
+	// return e.Visit(node.(types.Statement).Node)
 	case types.Expression:
 		return e.Visit(node.(types.Expression).Node)
 
@@ -168,7 +168,13 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 
 		functionCallArgs := node.(types.FunctionCall).Arguments
 		for i, v := range e.SymbolTable[n.Name].(types.Function).Arguments {
-			e.LocalSymbolTable[v.(types.Literal).Value.(string)] = e.Visit(functionCallArgs[i])
+			switch functionCallArgs[i].(types.Literal).Type {
+			case types.IDENT:
+				value := e.SymbolTable[functionCallArgs[i].(types.Literal).Value.(string)]
+				e.LocalSymbolTable[v.(types.Literal).Value.(string)] = value
+			default:
+				e.LocalSymbolTable[v.(types.Literal).Value.(string)] = e.Visit(functionCallArgs[i])
+			}
 		}
 		defer func() {
 			for _, v := range e.SymbolTable[n.Name].(types.Function).Arguments {

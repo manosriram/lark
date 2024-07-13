@@ -14,8 +14,7 @@ a <-> c;
 x <- 100;
 
 fn add[x, y] <<
-		local x <- 2;
-		return x+y;
+return x+y;
 >>
 
 c <- 100;
@@ -24,5 +23,7 @@ fn addlocalvar[a, b] <<
 		return a+b+c;
 >>
 
-fnval <- add(1,2);
+aa <- 100;
+bb <- 200;
+fnval <- add(aa, bb);
 localsum <- addlocalvar(1, 2);

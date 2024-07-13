@@ -25,6 +25,9 @@ func isalpha(c rune) bool {
 }
 
 func (s *Source) getCurrentToken() byte {
+	if s.CurrentPosition >= len(s.Content) {
+		return byte(0)
+	}
 	return s.Content[s.CurrentPosition]
 }
 
@@ -277,8 +280,11 @@ func Tokenize(source string) *Source {
 								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.INTEGER}, LineNumber: s.CurrentLineNumber})
 							} else if number, err := strconv.ParseFloat(arg, 64); err == nil {
 								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.FLOAT64}, LineNumber: s.CurrentLineNumber})
+							} else if strings.HasPrefix(strings.TrimSpace(arg), "\"") {
+								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.STRING}, LineNumber: s.CurrentLineNumber})
 							} else {
-								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: variable, Type: types.STRING}, LineNumber: s.CurrentLineNumber})
+								s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.IDENT}, LineNumber: s.CurrentLineNumber})
+								// s.Tokens = append(s.Tokens, Tokenize(arg).Tokens...)
 							}
 						}
 						s.eat()
