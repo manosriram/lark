@@ -9,7 +9,8 @@ import (
 )
 
 type Evaluator struct {
-	SymbolTable map[string]interface{}
+	SymbolTable      map[string]interface{}
+	LocalSymbolTable map[string]interface{}
 }
 
 type Comparator interface {
@@ -148,7 +149,11 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		}
 	case types.Assign:
 		right := e.Visit(n.Value)
-		e.SymbolTable[n.Id.(types.Id).Name] = right
+		if n.Type == types.GLOBAL_ASSIGN {
+			e.SymbolTable[n.Id.(types.Id).Name] = right
+		} else {
+			e.LocalSymbolTable[n.Id.(types.Id).Name] = right
+		}
 		return right
 	case types.Function:
 		e.SymbolTable[n.Name] = n
@@ -157,6 +162,20 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		if !ok {
 			log.Fatalf("variable '%s' not defined", n.Name)
 		}
+		if len(node.(types.FunctionCall).Arguments) != len(e.SymbolTable[n.Name].(types.Function).Arguments) {
+			log.Fatalf("function arguments mismatch\n")
+		}
+
+		functionCallArgs := node.(types.FunctionCall).Arguments
+		for i, v := range e.SymbolTable[n.Name].(types.Function).Arguments {
+			e.LocalSymbolTable[v.(types.Literal).Value.(string)] = e.Visit(functionCallArgs[i])
+		}
+		defer func() {
+			for _, v := range e.SymbolTable[n.Name].(types.Function).Arguments {
+				delete(e.LocalSymbolTable, v.(types.Literal).Value.(string))
+			}
+		}()
+
 		for _, v := range e.SymbolTable[n.Name].(types.Function).Children {
 			e.Visit(v)
 		}
@@ -172,12 +191,20 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		}
 		e.SymbolTable[n.Left.String()], e.SymbolTable[n.Right.String()] = e.SymbolTable[n.Right.String()], e.SymbolTable[n.Left.String()]
 	case types.Id:
-		value, ok := e.SymbolTable[n.Name]
+		value, ok := e.LocalSymbolTable[n.Name]
 		if !ok {
-			log.Fatalf("variable '%s' not defined", n)
+			value, ok = e.SymbolTable[n.Name]
+			if !ok {
+				log.Fatalf("variable '%s' not defined", n)
+			}
+			return value
 		}
 		return value
 	case types.Literal:
+		switch v := n.Value.(type) {
+		case int, float64, string, bool:
+			return v
+		}
 		nodeValue := n.Value.(types.Literal).Value
 		switch v := nodeValue.(type) {
 		case int, float64, string, bool:

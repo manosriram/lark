@@ -65,7 +65,14 @@ func (a *AstBuilder) Expr() types.Node {
 			right := a.Term()
 			left = types.BinOP{Left: left, Right: right, Op: op}
 		}
-	case types.ASSIGN:
+	case types.ASSIGN, types.LOCAL:
+		assignType := types.GLOBAL_ASSIGN
+		if a.getCurrentToken().TokenType == types.LOCAL {
+			a.eat(types.LOCAL)
+			assignType = types.LOCAL_ASSIGN
+			left = a.Term()
+		}
+
 		a.eat(types.ASSIGN)
 		right := a.Expr()
 		switch right.(type) {
@@ -74,10 +81,14 @@ func (a *AstBuilder) Expr() types.Node {
 		default:
 			a.eat(types.SEMICOLON)
 		}
-		return types.Assign{Id: left, Value: right}
+		return types.Assign{Id: left, Value: right, Type: assignType}
 	case types.FUNCTION_CALL:
 		fn := types.FunctionCall{Name: a.getCurrentToken().Value.(types.Literal).Value.(string)}
 		a.eat(types.FUNCTION_CALL)
+		for a.getCurrentToken().TokenType == types.FUNCTION_ARGUMENT {
+			fn.Arguments = append(fn.Arguments, a.getCurrentToken().Value)
+			a.eat(types.FUNCTION_ARGUMENT)
+		}
 		a.eat(types.SEMICOLON)
 		return fn
 	case types.FUNCTION:
@@ -87,8 +98,12 @@ func (a *AstBuilder) Expr() types.Node {
 		function := types.Function{
 			Name: functionName.(string),
 		}
-		a.eat(types.FUNCTION_ARGUMENT_OPEN)
-		a.eat(types.FUNCTION_ARGUMENT_CLOSE)
+		// a.eat(types.FUNCTION_ARGUMENT_OPEN)
+		for a.getCurrentToken().TokenType == types.FUNCTION_ARGUMENT {
+			function.Arguments = append(function.Arguments, a.getCurrentToken().Value)
+			a.eat(types.FUNCTION_ARGUMENT)
+		}
+		// a.eat(types.FUNCTION_ARGUMENT_CLOSE)
 		a.eat(types.FUNCTION_OPEN)
 		for a.getCurrentToken().TokenType != types.FUNCTION_RETURN && a.getCurrentToken().TokenType != types.FUNCTION_CLOSE {
 			node := a.Expr()
@@ -165,6 +180,9 @@ func (a *AstBuilder) Factor() types.Node {
 	case types.ID:
 		a.eat(types.ID)
 		return types.Id{Name: a.tokens[c].Value.(types.Literal).Value.(string)}
+	case types.LOCAL:
+		// a.eat(types.LOCAL)
+		return types.Literal{Value: "local", Type: types.KEYWORD}
 	case types.SEMICOLON:
 		a.eat(types.SEMICOLON)
 	case types.LBRACE:

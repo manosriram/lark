@@ -11,8 +11,11 @@ tt <- !false;
 c <-> e;
 a <-> c;
 
-fn add[] <<
-		return 1000+500;
+x <- 100;
+
+fn add[x, y] <<
+		local x <- 2;
+		return x+y;
 >>
 
-fnval <- add();
+fnval <- add(1,2);

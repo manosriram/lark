@@ -6,11 +6,17 @@ type TOKEN_TYPE string
 type STATEMENT_TYPE int
 type EXPRESSION_TYPE int
 type LITERAL_TYPE int
+type ASSIGN_TYPE int
 
 const (
 	EXPRESSION_STATEMENT STATEMENT_TYPE = iota
 	ASSIGN_STATEMENT
 	IF_STATEMENT
+)
+
+const (
+	GLOBAL_ASSIGN ASSIGN_TYPE = iota
+	LOCAL_ASSIGN
 )
 
 const (
@@ -25,6 +31,8 @@ const (
 	OPERATOR
 	BOOLEAN
 	STATEMENT
+	EXPRESSION
+	KEYWORD
 )
 
 const (
@@ -54,6 +62,7 @@ const (
 	LITERAL   = "literal"
 	EOF       = "EOF"
 	EXPR      = "expr"
+	LOCAL     = "local"
 	DOT       = "."
 	COMMENT   = "//"
 	SWAP      = "<->"
@@ -71,6 +80,7 @@ const (
 	FUNCTION_CALL_OPEN          = "("
 	FUNCTION_CALL_CLOSE         = ")"
 	FUNCTION_CALL               = "()"
+	FUNCTION_ARGUMENT           = "arg"
 )
 
 type Token struct {
@@ -135,7 +145,7 @@ func (e Expression) NodeType() string {
 
 type FunctionCall struct {
 	Name      string
-	Arguments []Id
+	Arguments []Node
 }
 
 func (f FunctionCall) NodeType() string {
@@ -148,7 +158,7 @@ func (f FunctionCall) String() string {
 
 type Function struct {
 	Name             string
-	Arguments        []Id
+	Arguments        []Node
 	Children         []Node
 	ReturnExpression Node
 }
@@ -205,6 +215,7 @@ func (b BinOP) String() string {
 type Assign struct {
 	Id    Node
 	Value Node
+	Type  ASSIGN_TYPE
 }
 
 func (a Assign) String() string {
