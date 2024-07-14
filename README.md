@@ -70,10 +70,18 @@ fn addWithArgsAndLocalVar[a,b] <<
   return a+b+c;
 >>
 
+fn addWithDynamicArgs[a,b] <<
+  return a+b;
+>>
+
 addWithNoReturn();
 staticsum <- addStaticVars();
 sumOne <- addWithArgs(1, 2); // 3
 sumTwo <- addWithArgsAndLocalVar(1, 2); // 6
+
+first <- 100;
+second <- 200;
+sumThree <- addWithDynamicArgs(first+(5-3)*second, second); // 700
 ```
 
 ### Usage

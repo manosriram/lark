@@ -273,6 +273,7 @@ func Tokenize(source string) *Source {
 						s.eat()
 						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 
+						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL_OPEN, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 						rawArgs := s.openUntil(')')
 						args := strings.Split(rawArgs, types.FUNCTION_ARGUMENT_SEPARATOR)
 						for _, arg := range args {
@@ -283,10 +284,10 @@ func Tokenize(source string) *Source {
 							} else if strings.HasPrefix(strings.TrimSpace(arg), "\"") {
 								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.STRING}, LineNumber: s.CurrentLineNumber})
 							} else {
-								s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.IDENT}, LineNumber: s.CurrentLineNumber})
-								// s.Tokens = append(s.Tokens, Tokenize(arg).Tokens...)
+								s.Tokens = append(s.Tokens, Tokenize(arg).Tokens...)
 							}
 						}
+						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL_CLOSE, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 						s.eat()
 						break
 					default:
@@ -295,7 +296,13 @@ func Tokenize(source string) *Source {
 					}
 				}
 			} else {
-				log.Fatalf("unsupported type %v at line %d\n", string(s.getCurrentToken()), s.CurrentLineNumber)
+				switch s.getCurrentToken() {
+				case ',':
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT_SEPARATOR, Value: types.Literal{Value: ",", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+					s.eat()
+				default:
+					log.Fatalf("unsupported type %v at line %d\n", string(s.getCurrentToken()), s.CurrentLineNumber)
+				}
 			}
 		}
 	}
