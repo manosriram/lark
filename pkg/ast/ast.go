@@ -50,7 +50,6 @@ func (a *AstBuilder) Expr() types.Node {
 		return nil
 	}
 	left := a.Term()
-	// z := a.getCurrentToken().TokenType
 	switch a.getCurrentToken().TokenType {
 	case types.TRUE, types.FALSE, types.NOT:
 		op := a.getCurrentToken().TokenType
@@ -102,12 +101,10 @@ func (a *AstBuilder) Expr() types.Node {
 		function := types.Function{
 			Name: functionName.(string),
 		}
-		// a.eat(types.FUNCTION_ARGUMENT_OPEN)
 		for a.getCurrentToken().TokenType == types.FUNCTION_ARGUMENT {
 			function.Arguments = append(function.Arguments, a.getCurrentToken().Value)
 			a.eat(types.FUNCTION_ARGUMENT)
 		}
-		// a.eat(types.FUNCTION_ARGUMENT_CLOSE)
 		a.eat(types.FUNCTION_OPEN)
 		for a.getCurrentToken().TokenType != types.FUNCTION_RETURN && a.getCurrentToken().TokenType != types.FUNCTION_CLOSE {
 			node := a.Expr()
@@ -181,13 +178,24 @@ func (a *AstBuilder) Factor() types.Node {
 	case types.LITERAL:
 		a.eat(types.LITERAL)
 		return types.Literal{Value: a.tokens[c].Value, Type: a.tokens[c].LiteralType}
+	case types.FUNCTION_ARGUMENT:
+		val := a.getCurrentToken().Value.(types.Literal)
+		a.eat(types.FUNCTION_ARGUMENT)
+		switch val.Type {
+		case types.INTEGER:
+			return types.Literal{Value: val.Value, Type: types.INTEGER}
+		case types.STRING:
+			return types.Literal{Value: val.Value, Type: types.STRING}
+		case types.FLOAT64:
+			return types.Literal{Value: val.Value, Type: types.FLOAT64}
+		}
 	case types.ID:
 		a.eat(types.ID)
 		return types.Id{Name: a.tokens[c].Value.(types.Literal).Value.(string)}
 	case types.LOCAL:
 		return types.Literal{Value: "local", Type: types.KEYWORD}
 	case types.SEMICOLON, types.FUNCTION_ARGUMENT_SEPARATOR:
-		a.eat(types.SEMICOLON)
+		a.eat(a.tokens[c].TokenType)
 	case types.LBRACE:
 		a.eat(types.LBRACE)
 		expr := a.Expr()
@@ -198,5 +206,7 @@ func (a *AstBuilder) Factor() types.Node {
 		right := a.Expr()
 		return right
 	}
+
+	// fmt.Println("got nil ", a.getCurrentToken().TokenType)
 	return nil
 }

@@ -12,10 +12,10 @@ c <-> e;
 a <-> c;
 
 fn add[x, y] <<
-return x+y;
+		return x+y;
 >>
 
 first <- 100;
 second <- 200;
 
-fnval <- add(first+(5-3)*second, second);
+fnval <- add(first+(5-3)*second, 1000);
