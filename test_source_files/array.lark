@@ -1,0 +1,12 @@
+fn abcd[] <<
+		local z <- [1,3,4];
+		return z@1 + z@2;
+>>
+
+twoSum <- abcd();
+
+ra <- [100,200];
+sum <- ra@0 + ra@1;
+
+arr <- [10, 20, 30];
+all <- arr@0 + arr@1 + arr@2;

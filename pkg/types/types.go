@@ -28,12 +28,14 @@ const (
 	FLOAT64 LITERAL_TYPE = iota
 	INTEGER
 	STRING
-	OPERATOR
 	BOOLEAN
+	ARRAY
+	OPERATOR
 	STATEMENT
 	EXPRESSION
 	KEYWORD
 	IDENT
+	ARRAY_INDEX_POSITION
 )
 
 const (
@@ -82,6 +84,11 @@ const (
 	FUNCTION_CALL_CLOSE         = ")"
 	FUNCTION_CALL               = "()"
 	FUNCTION_ARGUMENT           = "arg"
+
+	ARRAY_OPEN      = "["
+	ARRAY_CLOSE     = "]"
+	ARRAY_SEPARATOR = ","
+	ARRAY_INDEX     = "@"
 )
 
 type Token struct {
@@ -162,6 +169,7 @@ type Function struct {
 	Arguments        []Node
 	Children         []Node
 	ReturnExpression Node
+	Variables        []string
 }
 
 func (f Function) NodeType() string {
@@ -240,6 +248,20 @@ func (s Swap) NodeType() string {
 	return "swap"
 }
 
+type Array struct {
+	Name  string
+	Value interface{}
+	Index int
+}
+
+func (a Array) NodeType() string {
+	return "array"
+}
+
+func (a Array) String() string {
+	return fmt.Sprintf("array")
+}
+
 type Literal struct {
 	Value interface{}
 	Type  LITERAL_TYPE
@@ -256,6 +278,7 @@ func (l Literal) String() string {
 type Id struct {
 	Name  string
 	Value Node
+	Type  LITERAL_TYPE
 }
 
 func (i Id) NodeType() string {

@@ -113,6 +113,7 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		if leftType != rightType {
 			log.Fatalf("expression type mismatch\n")
 		}
+
 		switch left := left.(type) {
 		case int:
 			if right, ok := right.(int); ok {
@@ -193,6 +194,12 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 			e.Visit(v)
 		}
 		return e.Visit(e.SymbolTable[n.Name].(types.Function).ReturnExpression)
+	case types.Array:
+		val := e.SymbolTable[n.Name].([]interface{})
+		if n.Index >= len(val) || n.Index < 0 {
+			log.Fatalf("array index (%d) out of bounds (%d)\n", n.Index, len(val))
+		}
+		return val[n.Index]
 	case types.Swap:
 		_, ok := e.SymbolTable[n.Left.String()]
 		if !ok {
@@ -204,27 +211,50 @@ func (e *Evaluator) Visit(node types.Node) interface{} {
 		}
 		e.SymbolTable[n.Left.String()], e.SymbolTable[n.Right.String()] = e.SymbolTable[n.Right.String()], e.SymbolTable[n.Left.String()]
 	case types.Id:
-		value, ok := e.LocalSymbolTable[n.Name]
-		if !ok {
-			value, ok = e.SymbolTable[n.Name]
+		switch n.Type {
+		case types.ARRAY_INDEX_POSITION:
+			indexPosition := n.Value.(types.Literal).Value.(int)
+			arr, ok := e.LocalSymbolTable[n.Name].([]interface{})
 			if !ok {
-				log.Fatalf("variable '%s' not defined", n)
+				arr, ok = e.SymbolTable[n.Name].([]interface{})
+				if !ok {
+					log.Fatalf("variable '%s' not defined", n)
+				}
+				if indexPosition >= len(arr) || indexPosition < 0 {
+					log.Fatalf("array index (%d) out of bounds (%d)\n", indexPosition, len(arr))
+				}
+				return arr[indexPosition]
+			}
+			return arr[indexPosition]
+		default:
+			value, ok := e.LocalSymbolTable[n.Name]
+			if !ok {
+				value, ok = e.SymbolTable[n.Name]
+				if !ok {
+					log.Fatalf("variable '%s' not defined", n)
+				}
+				return value
 			}
 			return value
 		}
-		return value
 	case types.Literal:
 		switch v := n.Value.(type) {
 		case int, float64, string, bool:
 			return v
-		}
-		nodeValue := n.Value.(types.Literal).Value
-		switch v := nodeValue.(type) {
-		case int, float64, string, bool:
+		case []interface{}:
 			return v
+		}
+		nodeValue := n.Value
+		switch nodeValue.(type) {
+		case types.Literal:
+			switch nodeValue.(types.Literal).Type {
+			case types.INTEGER, types.FLOAT64, types.STRING, types.BOOLEAN:
+				return nodeValue.(types.Literal).Value
+			default:
+				log.Fatalf("unsupported type %s\n", "")
+			}
 		default:
-			log.Fatalf("unsupported type %s\n", v)
-
+			break
 		}
 		return node
 	}
