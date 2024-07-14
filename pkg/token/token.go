@@ -4,6 +4,7 @@ import (
 	"lark/pkg/types"
 	"log"
 	"strconv"
+	"strings"
 	"unicode"
 )
 
@@ -24,6 +25,9 @@ func isalpha(c rune) bool {
 }
 
 func (s *Source) getCurrentToken() byte {
+	if s.CurrentPosition >= len(s.Content) {
+		return byte(0)
+	}
 	return s.Content[s.CurrentPosition]
 }
 
@@ -243,24 +247,52 @@ func Tokenize(source string) *Source {
 				case "false":
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: false, Type: types.BOOLEAN}, LineNumber: s.CurrentLineNumber})
 				case "else":
-					s.Tokens = append(s.Tokens, types.Token{TokenType: types.ELSE, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.ELSE, Value: types.Literal{Value: "else", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 				case "if":
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.IF, Value: types.Literal{Value: "if", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 				case "fn":
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION, Value: types.Literal{Value: "fn", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 				case "return":
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_RETURN, Value: types.Literal{Value: "return", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+				case "local":
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.LOCAL, Value: types.Literal{Value: "local", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 				default:
 					switch s.getCurrentToken() {
+					case '[':
+						s.eat()
+						s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+
+						rawArgs := s.openUntil(']')
+						args := strings.Split(rawArgs, types.FUNCTION_ARGUMENT_SEPARATOR)
+						for _, arg := range args {
+							if len(strings.TrimSpace(arg)) > 0 {
+								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.EXPRESSION}, LineNumber: s.CurrentLineNumber})
+							}
+						}
+						s.eat()
+						break
 					case '(':
 						s.eat()
-						if s.getCurrentToken() == ')' {
-							s.eat()
-							s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
-							// s.eat()
-						} else {
-							log.Fatalf("expected ')'")
+						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+
+						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL_OPEN, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+						rawArgs := s.openUntil(')')
+						args := strings.Split(rawArgs, types.FUNCTION_ARGUMENT_SEPARATOR)
+						for _, arg := range args {
+							if len(strings.TrimSpace(arg)) > 0 {
+								if number, err := strconv.Atoi(strings.TrimSpace(arg)); err == nil {
+									s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.INTEGER}, LineNumber: s.CurrentLineNumber})
+								} else if number, err := strconv.ParseFloat(arg, 64); err == nil {
+									s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.FLOAT64}, LineNumber: s.CurrentLineNumber})
+								} else if strings.HasPrefix(strings.TrimSpace(arg), "\"") {
+									s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.STRING}, LineNumber: s.CurrentLineNumber})
+								} else {
+									s.Tokens = append(s.Tokens, Tokenize(arg).Tokens...)
+								}
+							}
 						}
+						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL_CLOSE, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+						s.eat()
 						break
 					default:
 						s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: variable, Type: types.STRING}, LineNumber: s.CurrentLineNumber})
@@ -268,7 +300,13 @@ func Tokenize(source string) *Source {
 					}
 				}
 			} else {
-				log.Fatalf("unsupported type %v at line %d\n", string(s.getCurrentToken()), s.CurrentLineNumber)
+				switch s.getCurrentToken() {
+				case ',':
+					s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT_SEPARATOR, Value: types.Literal{Value: ",", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+					s.eat()
+				default:
+					log.Fatalf("unsupported type %v at line %d\n", string(s.getCurrentToken()), s.CurrentLineNumber)
+				}
 			}
 		}
 	}

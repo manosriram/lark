@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-lark",
+            "type": "shell",
+            "command": "go build -o lark",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": ["$go"]
+        }
+    ]
+}

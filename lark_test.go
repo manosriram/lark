@@ -16,6 +16,7 @@ func evaluate(t *testing.T, sourceFile string) map[string]interface{} {
 
 	root := types.Compound{Children: []types.Node{}}
 	symbolTable = make(map[string]interface{})
+	localSymbolTable = make(map[string]interface{})
 	tokens := token.Tokenize(string(content))
 	builder := ast.NewAstBuilder(tokens.Tokens)
 	var tree types.Node
@@ -26,7 +27,8 @@ func evaluate(t *testing.T, sourceFile string) map[string]interface{} {
 		}
 	}
 	evaluator := ast.Evaluator{
-		SymbolTable: symbolTable,
+		SymbolTable:      symbolTable,
+		LocalSymbolTable: localSymbolTable,
 	}
 
 	for _, node := range root.Children {
@@ -135,8 +137,12 @@ func Test_Parser(t *testing.T) {
 
 func Test_Function(t *testing.T) {
 	symbolTable := evaluate(t, "test_source_files/function.lark")
-	assert.Equal(t, len(symbolTable), 4)
+	assert.Equal(t, 12, len(symbolTable))
 	assert.Equal(t, 1000, symbolTable["fna"])
 	assert.Equal(t, 500, symbolTable["fnb"])
 	assert.Equal(t, 1500, symbolTable["fnval"])
+	assert.Equal(t, 3, symbolTable["sum"])
+	assert.Equal(t, 9, symbolTable["localSum"])
+	assert.Equal(t, 103, symbolTable["dynamicSum"])
+	assert.Equal(t, 603, symbolTable["expressionSum"])
 }

@@ -10,6 +10,7 @@ import (
 )
 
 var symbolTable map[string]interface{}
+var localSymbolTable map[string]interface{}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -24,6 +25,7 @@ func main() {
 	root := types.Compound{Children: []types.Node{}}
 
 	symbolTable = make(map[string]interface{})
+	localSymbolTable = make(map[string]interface{})
 	tokens := token.Tokenize(string(content))
 	builder := ast.NewAstBuilder(tokens.Tokens)
 	var tree types.Node
@@ -34,7 +36,8 @@ func main() {
 		}
 	}
 	evaluator := ast.Evaluator{
-		SymbolTable: symbolTable,
+		SymbolTable:      symbolTable,
+		LocalSymbolTable: localSymbolTable,
 	}
 
 	for _, node := range root.Children {

@@ -1,7 +1,25 @@
-fn addstatic[] <<
+fn addStatic[] <<
 		fna <- 1000;
 		fnb <- 500;
 		return fna+fnb;
 >>
 
-fnval <- addstatic();
+fn add[a,b] <<
+		return a+b;
+>>
+
+c <- 100;
+fn addLocalVar[a, b] <<
+		local c <- 6;
+		return a+b+c;
+>>
+
+fn addDynamicArgs[a, b] <<
+		return a+b;
+>>
+
+fnval <- addStatic();
+sum <- add(1,2);
+localSum <- addLocalVar(1, 2);
+dynamicSum <- addDynamicArgs(sum, 100);
+expressionSum <- addDynamicArgs(sum+100*(10/2), 100);
