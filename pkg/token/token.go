@@ -175,11 +175,14 @@ func Tokenize(source string) *Source {
 			default:
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.NOT, Value: types.Literal{Value: "!", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			}
+		case ',':
+			s.Tokens = append(s.Tokens, types.Token{TokenType: types.ARRAY_SEPARATOR, Value: types.Literal{Value: ",", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
+			s.eat()
 		case '[':
-			s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT_OPEN, Value: types.Literal{Value: "[", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+			s.Tokens = append(s.Tokens, types.Token{TokenType: types.ARRAY_OPEN, Value: types.Literal{Value: "[", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			s.eat()
 		case ']':
-			s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT_CLOSE, Value: types.Literal{Value: "]", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+			s.Tokens = append(s.Tokens, types.Token{TokenType: types.ARRAY_CLOSE, Value: types.Literal{Value: "]", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			s.eat()
 		case '<':
 			s.eat()
@@ -258,6 +261,15 @@ func Tokenize(source string) *Source {
 					s.Tokens = append(s.Tokens, types.Token{TokenType: types.LOCAL, Value: types.Literal{Value: "local", Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 				default:
 					switch s.getCurrentToken() {
+					case '@':
+						s.eat()
+						index := s.eatNum()
+						s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: variable, Type: types.EXPRESSION}, LineNumber: s.CurrentLineNumber})
+						s.Tokens = append(s.Tokens, types.Token{TokenType: types.ARRAY_INDEX, Value: types.Literal{Value: "@", Type: types.EXPRESSION}, LineNumber: s.CurrentLineNumber})
+						if ind, err := strconv.Atoi(strings.TrimSpace(index)); err == nil {
+							s.Tokens = append(s.Tokens, types.Token{TokenType: types.LITERAL, Value: types.Literal{Value: ind, Type: types.EXPRESSION}, LineNumber: s.CurrentLineNumber})
+						}
+						break
 					case '[':
 						s.eat()
 						s.Tokens = append(s.Tokens, types.Token{TokenType: types.ID, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
@@ -274,7 +286,6 @@ func Tokenize(source string) *Source {
 					case '(':
 						s.eat()
 						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
-
 						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL_OPEN, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
 						rawArgs := s.openUntil(')')
 						args := strings.Split(rawArgs, types.FUNCTION_ARGUMENT_SEPARATOR)

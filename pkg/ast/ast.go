@@ -1,7 +1,7 @@
 package ast
 
 import (
-	types "lark/pkg/types"
+	"lark/pkg/types"
 	"log"
 )
 
@@ -81,6 +81,19 @@ func (a *AstBuilder) Expr() types.Node {
 			a.eat(types.SEMICOLON)
 		}
 		return types.Assign{Id: left, Value: right, Type: assignType}
+	case types.ARRAY_OPEN:
+		a.eat(types.ARRAY_OPEN)
+		var arr []interface{}
+		for a.getCurrentToken().TokenType != types.ARRAY_CLOSE {
+			arr = append(arr, a.getCurrentToken().Value.(types.Literal).Value)
+			a.eat(types.LITERAL)
+			if a.getCurrentToken().TokenType == types.ARRAY_SEPARATOR {
+				a.eat(a.getCurrentToken().TokenType)
+			}
+		}
+		a.eat(types.ARRAY_CLOSE)
+		return types.Literal{Value: arr, Type: types.ARRAY}
+
 	case types.FUNCTION_CALL:
 		fn := types.FunctionCall{Name: a.getCurrentToken().Value.(types.Literal).Value.(string)}
 		a.eat(types.FUNCTION_CALL)
@@ -191,6 +204,12 @@ func (a *AstBuilder) Factor() types.Node {
 		}
 	case types.ID:
 		a.eat(types.ID)
+		if a.getCurrentToken().TokenType == types.ARRAY_INDEX {
+			a.eat(types.ARRAY_INDEX)
+			val := a.getCurrentToken().Value.(types.Literal)
+			a.eat(types.LITERAL)
+			return types.Id{Name: a.tokens[c].Value.(types.Literal).Value.(string), Value: val, Type: types.ARRAY_INDEX_POSITION}
+		}
 		return types.Id{Name: a.tokens[c].Value.(types.Literal).Value.(string)}
 	case types.LOCAL:
 		return types.Literal{Value: "local", Type: types.KEYWORD}

@@ -146,3 +146,11 @@ func Test_Function(t *testing.T) {
 	assert.Equal(t, 103, symbolTable["dynamicSum"])
 	assert.Equal(t, 603, symbolTable["expressionSum"])
 }
+
+func Test_Array(t *testing.T) {
+	symbolTable := evaluate(t, "test_source_files/array.lark")
+	assert.Equal(t, 6, len(symbolTable))
+	assert.Equal(t, 60, symbolTable["all"])
+	assert.Equal(t, 300, symbolTable["sum"])
+	assert.Equal(t, 7, symbolTable["twoSum"])
+}

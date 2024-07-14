@@ -7,7 +7,7 @@ if (a==b) {
 } else {
 		c <- "not_ok";
 }
-tt <- !false;
+boolVal <- !false;
 c <-> e;
 a <-> c;
 
@@ -19,3 +19,12 @@ first <- 100;
 second <- 200;
 
 fnval <- add(first+(5-3)*second, 1000);
+
+fn arrayAccess[] <<
+		local z <- [1,3,4];
+		return z@1 + z@2;
+>>
+
+zz <- arrayAccess();
+arr <- [100,200];
+sum <- arr@0 + arr@1;
