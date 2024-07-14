@@ -36,7 +36,7 @@ func (a *AstBuilder) eat(t types.TOKEN_TYPE) bool {
 		a.CurrentTokenPointer++
 		return true
 	} else {
-		log.Fatalf("syntax error: expected %s\n", t)
+		log.Fatalf("line %d: expected %s\n", a.getCurrentToken().LineNumber, t)
 	}
 	return false
 }
@@ -179,7 +179,7 @@ func (a *AstBuilder) Factor() types.Node {
 	case types.NOT:
 		a.eat(types.NOT)
 		if a.peek(0).Value.(types.Literal).Type != types.BOOLEAN {
-			log.Fatalf("unexpected token")
+			log.Fatalf("line %d: expected boolean\n", a.getCurrentToken().LineNumber)
 		}
 		return types.UnaryOP{Left: types.NOT, Right: a.Expr()}
 	case types.COMMENT:

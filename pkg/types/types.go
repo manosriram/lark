@@ -1,7 +1,5 @@
 package types
 
-import "fmt"
-
 type TOKEN_TYPE string
 type STATEMENT_TYPE int
 type EXPRESSION_TYPE int
@@ -144,11 +142,11 @@ type Expression struct {
 }
 
 func (s Statement) NodeType() string {
-	return "statement"
+	return "STATEMENT"
 }
 
 func (e Expression) NodeType() string {
-	return "expression"
+	return "EXPRESSION"
 }
 
 type FunctionCall struct {
@@ -157,11 +155,11 @@ type FunctionCall struct {
 }
 
 func (f FunctionCall) NodeType() string {
-	return "functioncall"
+	return FUNCTION_CALL
 }
 
 func (f FunctionCall) String() string {
-	return "fncall"
+	return f.Name
 }
 
 type Function struct {
@@ -173,11 +171,11 @@ type Function struct {
 }
 
 func (f Function) NodeType() string {
-	return "function"
+	return FUNCTION
 }
 
 func (f Function) String() string {
-	return "fn"
+	return f.Name
 }
 
 type IfElseStatement struct {
@@ -187,11 +185,11 @@ type IfElseStatement struct {
 }
 
 func (i IfElseStatement) NodeType() string {
-	return "ifstatement"
+	return "IF_ELSE"
 }
 
 func (i IfElseStatement) String() string {
-	return "if"
+	return ""
 }
 
 type UnaryOP struct {
@@ -200,11 +198,11 @@ type UnaryOP struct {
 }
 
 func (u UnaryOP) NodeType() string {
-	return "unary"
+	return "UNARY_OP"
 }
 
 func (u UnaryOP) String() string {
-	return string(u.Left)
+	return ""
 }
 
 type BinOP struct {
@@ -214,11 +212,11 @@ type BinOP struct {
 }
 
 func (b BinOP) NodeType() string {
-	return "bin"
+	return "BIN_OP"
 }
 
 func (b BinOP) String() string {
-	return string(b.Op)
+	return ""
 }
 
 type Assign struct {
@@ -227,12 +225,12 @@ type Assign struct {
 	Type  ASSIGN_TYPE
 }
 
-func (a Assign) String() string {
-	return a.Id.String()
+func (a Assign) NodeType() string {
+	return ASSIGN
 }
 
-func (a Assign) NodeType() string {
-	return "assign"
+func (a Assign) String() string {
+	return a.Id.String()
 }
 
 type Swap struct {
@@ -240,12 +238,12 @@ type Swap struct {
 	Right Node
 }
 
-func (s Swap) String() string {
-	return s.Left.String()
+func (s Swap) NodeType() string {
+	return SWAP
 }
 
-func (s Swap) NodeType() string {
-	return "swap"
+func (s Swap) String() string {
+	return ""
 }
 
 type Array struct {
@@ -255,11 +253,11 @@ type Array struct {
 }
 
 func (a Array) NodeType() string {
-	return "array"
+	return "ARRAY"
 }
 
 func (a Array) String() string {
-	return fmt.Sprintf("array")
+	return a.Name
 }
 
 type Literal struct {
@@ -268,11 +266,11 @@ type Literal struct {
 }
 
 func (l Literal) NodeType() string {
-	return "literal"
+	return LITERAL
 }
 
 func (l Literal) String() string {
-	return fmt.Sprintf("%v", l.Type)
+	return ""
 }
 
 type Id struct {
@@ -282,7 +280,7 @@ type Id struct {
 }
 
 func (i Id) NodeType() string {
-	return "id"
+	return ID
 }
 
 func (i Id) String() string {
