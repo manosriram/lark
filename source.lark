@@ -1,3 +1,16 @@
+a <- (1+3)==2; // false
+b <- true;
+c <- -123;
+e <- (1+2+3) + c + (3*1/10);
+if (a==b) {
+		c <- "ok";
+} else {
+		c <- "not_ok";
+}
+tt <- !false;
+c <-> e;
+a <-> c;
+
 fn add[x, y] <<
 return x+y;
 >>
