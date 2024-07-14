@@ -137,10 +137,12 @@ func Test_Parser(t *testing.T) {
 
 func Test_Function(t *testing.T) {
 	symbolTable := evaluate(t, "test_source_files/function.lark")
-	assert.Equal(t, 9, len(symbolTable))
+	assert.Equal(t, 12, len(symbolTable))
 	assert.Equal(t, 1000, symbolTable["fna"])
 	assert.Equal(t, 500, symbolTable["fnb"])
 	assert.Equal(t, 1500, symbolTable["fnval"])
-	assert.Equal(t, 6, symbolTable["sum"])
-	assert.Equal(t, 9, symbolTable["localsum"])
+	assert.Equal(t, 3, symbolTable["sum"])
+	assert.Equal(t, 9, symbolTable["localSum"])
+	assert.Equal(t, 103, symbolTable["dynamicSum"])
+	assert.Equal(t, 603, symbolTable["expressionSum"])
 }

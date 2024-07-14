@@ -265,7 +265,9 @@ func Tokenize(source string) *Source {
 						rawArgs := s.openUntil(']')
 						args := strings.Split(rawArgs, types.FUNCTION_ARGUMENT_SEPARATOR)
 						for _, arg := range args {
-							s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.EXPRESSION}, LineNumber: s.CurrentLineNumber})
+							if len(strings.TrimSpace(arg)) > 0 {
+								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.EXPRESSION}, LineNumber: s.CurrentLineNumber})
+							}
 						}
 						s.eat()
 						break
@@ -277,14 +279,16 @@ func Tokenize(source string) *Source {
 						rawArgs := s.openUntil(')')
 						args := strings.Split(rawArgs, types.FUNCTION_ARGUMENT_SEPARATOR)
 						for _, arg := range args {
-							if number, err := strconv.Atoi(strings.TrimSpace(arg)); err == nil {
-								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.INTEGER}, LineNumber: s.CurrentLineNumber})
-							} else if number, err := strconv.ParseFloat(arg, 64); err == nil {
-								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.FLOAT64}, LineNumber: s.CurrentLineNumber})
-							} else if strings.HasPrefix(strings.TrimSpace(arg), "\"") {
-								s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.STRING}, LineNumber: s.CurrentLineNumber})
-							} else {
-								s.Tokens = append(s.Tokens, Tokenize(arg).Tokens...)
+							if len(strings.TrimSpace(arg)) > 0 {
+								if number, err := strconv.Atoi(strings.TrimSpace(arg)); err == nil {
+									s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.INTEGER}, LineNumber: s.CurrentLineNumber})
+								} else if number, err := strconv.ParseFloat(arg, 64); err == nil {
+									s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: number, Type: types.FLOAT64}, LineNumber: s.CurrentLineNumber})
+								} else if strings.HasPrefix(strings.TrimSpace(arg), "\"") {
+									s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_ARGUMENT, Value: types.Literal{Value: strings.TrimSpace(arg), Type: types.STRING}, LineNumber: s.CurrentLineNumber})
+								} else {
+									s.Tokens = append(s.Tokens, Tokenize(arg).Tokens...)
+								}
 							}
 						}
 						s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CALL_CLOSE, Value: types.Literal{Value: variable, Type: types.STATEMENT}, LineNumber: s.CurrentLineNumber})
