@@ -18,6 +18,9 @@ c <- 3.14;
 d <- true;
 e <- 123;
 f <- (1+2+3) + c + (3*1/10);
+arr <- [1,2,3];
+firstElement <- arr@0;
+thirdElement <- arr@2;
 unary <- !false;
 ```
 
@@ -78,6 +81,10 @@ fn addWithStaticAndDynamicArgs[a,b] <<
   return a+b;
 >>
 
+fn addArrayElements[arr] <<
+  return arr@0 + arr@1;
+>>
+
 addWithNoReturn();
 staticsum <- addStaticVars();
 sumOne <- addWithArgs(1, 2); // 3
@@ -88,6 +95,10 @@ second <- 200;
 sumThree <- addWithDynamicArgs(first+(5-3)*second, second); // 700
 
 sumFour <- addWithStaticAndDynamicArgs(first, 2000); // 2100
+
+arr <- [1,2];
+arrSum <- addArrayElements(arr);
+arrSumViaArgs <- addWithArgs(arr@0, arr@1);
 ```
 
 ### Usage
