@@ -118,8 +118,8 @@ func (a *AstBuilder) Expr() types.Node {
 			function.Arguments = append(function.Arguments, a.getCurrentToken().Value)
 			a.eat(types.FUNCTION_ARGUMENT)
 		}
-		a.eat(types.FUNCTION_OPEN)
-		for a.getCurrentToken().TokenType != types.FUNCTION_RETURN && a.getCurrentToken().TokenType != types.FUNCTION_CLOSE {
+		a.eat(types.STATEMENT_BLOCK_OPEN)
+		for a.getCurrentToken().TokenType != types.FUNCTION_RETURN && a.getCurrentToken().TokenType != types.STATEMENT_BLOCK_CLOSE {
 			node := a.Expr()
 			function.Children = append(function.Children, node)
 		}
@@ -128,7 +128,7 @@ func (a *AstBuilder) Expr() types.Node {
 			function.ReturnExpression = a.Expr()
 			a.eat(types.SEMICOLON)
 		}
-		a.eat(types.FUNCTION_CLOSE)
+		a.eat(types.STATEMENT_BLOCK_CLOSE)
 		return function
 
 	case types.SWAP:
@@ -141,20 +141,20 @@ func (a *AstBuilder) Expr() types.Node {
 		condition := a.Expr()
 		ifStatement := types.IfElseStatement{Condition: condition}
 
-		a.eat(types.LPAREN)
-		for a.getCurrentToken().TokenType != types.RPAREN {
+		a.eat(types.STATEMENT_BLOCK_OPEN)
+		for a.getCurrentToken().TokenType != types.STATEMENT_BLOCK_CLOSE {
 			node := a.Expr()
 			ifStatement.IfChildren = append(ifStatement.IfChildren, node)
 		}
-		a.eat(types.RPAREN)
+		a.eat(types.STATEMENT_BLOCK_CLOSE)
 		if a.getCurrentToken().TokenType == types.ELSE {
 			a.eat(types.ELSE)
-			a.eat(types.LPAREN)
-			for a.getCurrentToken().TokenType != types.RPAREN {
+			a.eat(types.STATEMENT_BLOCK_OPEN)
+			for a.getCurrentToken().TokenType != types.STATEMENT_BLOCK_CLOSE {
 				node := a.Expr()
 				ifStatement.ElseChildren = append(ifStatement.ElseChildren, node)
 			}
-			a.eat(types.RPAREN)
+			a.eat(types.STATEMENT_BLOCK_CLOSE)
 		}
 		return ifStatement
 	}

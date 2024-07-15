@@ -188,7 +188,7 @@ func Tokenize(source string) *Source {
 			s.eat()
 			switch s.getCurrentToken() {
 			case '<':
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_OPEN, Value: types.Literal{Value: "<<", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.STATEMENT_BLOCK_OPEN, Value: types.Literal{Value: "<<", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 				s.eat()
 			case '=':
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.LESSER_OR_EQUAL, Value: types.Literal{Value: "<=", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
@@ -207,7 +207,7 @@ func Tokenize(source string) *Source {
 			s.eat()
 			switch s.getCurrentToken() {
 			case '>':
-				s.Tokens = append(s.Tokens, types.Token{TokenType: types.FUNCTION_CLOSE, Value: types.Literal{Value: ">>", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.STATEMENT_BLOCK_CLOSE, Value: types.Literal{Value: ">>", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 				s.eat()
 			case '=':
 				s.Tokens = append(s.Tokens, types.Token{TokenType: types.GREATER_OR_EQUAL, Value: types.Literal{Value: ">=", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
