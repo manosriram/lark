@@ -37,11 +37,11 @@ unary <- !false;
 ```
 a <- (1+3)==2; // false
 b <- true;
-if (a==b) {
+if (a==b) <<
   c <- "ok";
-} else {
+>> else <<
   c <- "not_ok";
-}
+>>
 ```
 
 > swap variables
@@ -99,6 +99,10 @@ sumFour <- addWithStaticAndDynamicArgs(first, 2000); // 2100
 arr <- [1,2];
 arrSum <- addArrayElements(arr);
 arrSumViaArgs <- addWithArgs(arr@0, arr@1);
+
+if (arr@0 == 1) <<
+  equals <- "equals 1";
+>>
 ```
 
 ### Usage
