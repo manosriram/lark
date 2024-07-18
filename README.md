@@ -113,3 +113,5 @@ if (arr@0 == 1) <<
 `go build -o lark && ./lark <filename>`
 
 [Progress Board](https://trello.com/b/1qAWAjZS/lark)
+
+Also read: https://manosriram.com/posts/writing-an-interpreter/
