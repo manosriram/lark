@@ -184,6 +184,24 @@ func Tokenize(source string) *Source {
 		case ']':
 			s.Tokens = append(s.Tokens, types.Token{TokenType: types.ARRAY_CLOSE, Value: types.Literal{Value: "]", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
 			s.eat()
+		case '|':
+			s.eat()
+			switch s.getCurrentToken() {
+			case '|':
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.OR, Value: types.Literal{Value: "||", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.eat()
+			default:
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.BITWISE_OR, Value: types.Literal{Value: "|", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+			}
+		case '&':
+			s.eat()
+			switch s.getCurrentToken() {
+			case '&':
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.AND, Value: types.Literal{Value: "||", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+				s.eat()
+			default:
+				s.Tokens = append(s.Tokens, types.Token{TokenType: types.BITWISE_AND, Value: types.Literal{Value: "|", Type: types.OPERATOR}, LineNumber: s.CurrentLineNumber})
+			}
 		case '<':
 			s.eat()
 			switch s.getCurrentToken() {

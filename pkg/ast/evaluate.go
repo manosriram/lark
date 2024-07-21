@@ -18,7 +18,7 @@ type Comparator interface {
 }
 
 type RealNumber interface {
-	int | float64
+	int | float64 | int32 | float32
 }
 
 func performBooleanComparisionOperation(left, right bool, op types.TOKEN_TYPE) bool {
@@ -29,6 +29,10 @@ func performBooleanComparisionOperation(left, right bool, op types.TOKEN_TYPE) b
 		return left == right
 	case types.NOT_EQUAL:
 		return left != right
+	case types.OR:
+		return left || right
+	case types.AND:
+		return left && right
 	default:
 		panic(fmt.Sprintf("unsupported operation: %v", op))
 	}

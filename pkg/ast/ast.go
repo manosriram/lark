@@ -57,8 +57,8 @@ func (a *AstBuilder) Expr() types.Node {
 		right := a.Expr()
 		left = types.BinOP{Left: left, Right: right, Op: op}
 
-	case types.PLUS, types.MINUS, types.EQUALS, types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.NOT_EQUAL:
-		for a.getCurrentToken().TokenType == types.PLUS || a.getCurrentToken().TokenType == types.MINUS || a.getCurrentToken().TokenType == types.EQUALS || a.getCurrentToken().TokenType == types.GREATER || a.getCurrentToken().TokenType == types.GREATER_OR_EQUAL || a.getCurrentToken().TokenType == types.LESSER || a.getCurrentToken().TokenType == types.LESSER_OR_EQUAL || a.getCurrentToken().TokenType == types.NOT_EQUAL {
+	case types.PLUS, types.MINUS, types.EQUALS, types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.NOT_EQUAL, types.OR, types.AND, types.BITWISE_OR, types.BITWISE_AND:
+		for a.getCurrentToken().TokenType == types.PLUS || a.getCurrentToken().TokenType == types.MINUS || a.getCurrentToken().TokenType == types.EQUALS || a.getCurrentToken().TokenType == types.GREATER || a.getCurrentToken().TokenType == types.GREATER_OR_EQUAL || a.getCurrentToken().TokenType == types.LESSER || a.getCurrentToken().TokenType == types.LESSER_OR_EQUAL || a.getCurrentToken().TokenType == types.NOT_EQUAL || a.getCurrentToken().TokenType == types.OR || a.getCurrentToken().TokenType == types.AND {
 			op := a.getCurrentToken().TokenType
 			a.eat(op)
 			right := a.Term()
@@ -220,7 +220,7 @@ func (a *AstBuilder) Factor() types.Node {
 		expr := a.Expr()
 		a.eat(types.RBRACE)
 		return expr
-	case types.EQUALS, types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.NOT_EQUAL:
+	case types.EQUALS, types.GREATER, types.GREATER_OR_EQUAL, types.LESSER, types.LESSER_OR_EQUAL, types.NOT_EQUAL, types.OR, types.AND, types.BITWISE_OR, types.BITWISE_AND:
 		a.eat(a.getCurrentToken().TokenType)
 		right := a.Expr()
 		return right

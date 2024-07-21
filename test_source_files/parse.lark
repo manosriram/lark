@@ -8,4 +8,5 @@ if (a==b) <<
 		d <- "not_ok";
 >>
 tt <- !false;
-
+and <- a && b;
+or <- a || b;

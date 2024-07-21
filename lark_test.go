@@ -121,12 +121,14 @@ func areValuesEqual(v1, v2 interface{}) bool {
 func Test_Parser(t *testing.T) {
 	symbolTable := evaluate(t, "test_source_files/parse.lark")
 	expectedSymbolTableVars := map[string]interface{}{
-		"a":  false,
-		"b":  true,
-		"c":  -123,
-		"e":  -117,
-		"tt": true,
-		"d":  "not_ok",
+		"a":   false,
+		"b":   true,
+		"c":   -123,
+		"e":   -117,
+		"tt":  true,
+		"d":   "not_ok",
+		"and": false,
+		"or":  true,
 	}
 
 	assert.Equal(t, len(expectedSymbolTableVars), len(symbolTable))

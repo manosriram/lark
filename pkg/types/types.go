@@ -71,6 +71,11 @@ const (
 	TRUE  = "true"
 	FALSE = "false"
 
+	OR          = "||"
+	AND         = "&&"
+	BITWISE_OR  = "|"
+	BITWISE_AND = "&"
+
 	FUNCTION                    = "fn"
 	FUNCTION_ARGUMENT_OPEN      = "["
 	FUNCTION_ARGUMENT_CLOSE     = "]"
